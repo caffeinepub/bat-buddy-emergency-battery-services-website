@@ -1,0 +1,97 @@
+{
+  "kind": "feature_evidence_report",
+  "features": [
+    {
+      "featureId": "feature-update-the-payment-successful-page-copy-to-replace-any-instance-of-volt-now-voltnow-with-bolt-now-case-insensitive-using-english-user-facing-text",
+      "featureTitle": "Update the Payment Successful page copy to replace any instance of \"Volt Now\"/\"VOLTNOW\" with \"Bolt Now\" (case-insensitive), using English user-facing text.",
+      "files": [
+        "frontend/src/pages/PaymentSuccess.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "stripe@3.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "http-outcalls@3.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-8"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-insert-an-address-location-confirmation-step-between-product-selection-and-payment-options-after-a-user-selects-a-battery-product-on-buy-now-redirect-them-to-a-new-address-confirmation-page-where-they-can-either-a-share-current-location-via-the-browser-s-gps-geolocation-permission-prompt-or-b-manually-enter-an-address-only-after-confirming-an-address-location-should-the-flow-continue-to-payment-options",
+      "featureTitle": "Insert an address/location confirmation step between product selection and payment options: after a user selects a battery/product on /buy-now, redirect them to a new address confirmation page where they can either (a) share current location via the browser's GPS/geolocation permission prompt or (b) manually enter an address; only after confirming an address/location should the flow continue to /payment-options.",
+      "files": [
+        "frontend/src/pages/AddressConfirmationPage.tsx",
+        "frontend/src/pages/BuyNowPage.tsx",
+        "frontend/src/utils/checkoutFlow.ts"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "stripe@3.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "http-outcalls@3.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-9"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-register-the-new-address-confirmation-route-in-the-tanstack-router-configuration-and-ensure-direct-navigation-via-url-works-update-navigation-search-parameter-handling-so-payment-options-can-receive-both-productid-and-the-confirmed-address-location-data-with-a-reasonable-fallback-when-opened-directly",
+      "featureTitle": "Register the new address confirmation route in the TanStack Router configuration and ensure direct navigation via URL works; update navigation/search parameter handling so /payment-options can receive both productId and the confirmed address/location data with a reasonable fallback when opened directly.",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/pages/AddressConfirmationPage.tsx",
+        "frontend/src/pages/PaymentOptionsPage.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "stripe@3.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "http-outcalls@3.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-10"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-on-payment-options-collect-payment-method-specific-details-before-allowing-the-user-to-proceed-selecting-credit-debit-card-must-show-and-require-card-detail-fields-selecting-mobile-payment-must-show-and-require-a-phone-number-field-other-payment-methods-may-proceed-without-extra-fields-unless-already-required-by-existing-ui-logic",
+      "featureTitle": "On /payment-options, collect payment-method-specific details before allowing the user to proceed: selecting \"Credit/Debit Card\" must show and require card detail fields; selecting \"Mobile Payment\" must show and require a phone number field; other payment methods may proceed without extra fields unless already required by existing UI logic.",
+      "files": [
+        "frontend/src/pages/PaymentOptionsPage.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "stripe@3.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "http-outcalls@3.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-11"
+      ],
+      "confidence": "high"
+    }
+  ]
+}

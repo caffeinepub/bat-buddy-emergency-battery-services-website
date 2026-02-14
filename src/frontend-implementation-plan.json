@@ -1,0 +1,93 @@
+{
+  "kind": "implementation_plan",
+  "version": "1.0",
+  "title": "Bolt Now checkout flow: branding fix, address confirmation step, and payment detail validation",
+  "requirements": [
+    {
+      "id": "REQ-8",
+      "summary": "Fix Payment Successful page branding text to say “Bolt Now” (no “Volt Now/VOLTNOW”).",
+      "acceptanceCriteria": [
+        "On /payment-success, the thank-you/brand text says \"Bolt Now\" and does not contain \"Volt Now\" or \"VOLTNOW\" anywhere on the page.",
+        "All user-facing text remains in English."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/PaymentSuccess.tsx",
+          "operation": "modify",
+          "description": "Replace any user-facing “Volt Now”/“VOLTNOW” occurrences with “Bolt Now” (case-insensitive) in the Payment Success copy while keeping all text in English. Use existing shadcn-ui Card/Button primitives already imported (verify the component's usage instructions before implementing)."
+        }
+      ]
+    },
+    {
+      "id": "REQ-9",
+      "summary": "Add an address/location confirmation step after product selection and before payment options.",
+      "acceptanceCriteria": [
+        "Clicking \"Buy Now\" on /buy-now navigates to a new address confirmation route (new page) instead of navigating directly to /payment-options.",
+        "The address confirmation page provides: (1) a button to request current location using the browser geolocation API (which triggers the browser permission prompt), and (2) a manual address input option.",
+        "The user cannot continue to /payment-options until they have confirmed either a geolocation result (lat/lng) or a non-empty manual address.",
+        "After confirming, navigation proceeds to /payment-options while preserving the selected productId and the confirmed address/location data.",
+        "If the user denies geolocation permission or an error occurs, the UI shows an English error message and still allows manual address entry and confirmation."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/AddressConfirmationPage.tsx",
+          "operation": "create",
+          "description": "Create a new Address Confirmation page that (a) requests current location via the browser geolocation API (triggering the permission prompt) and (b) supports manual address entry. Include an explicit confirm action that is disabled until either lat/lng is confirmed or a non-empty manual address is confirmed; display English error messaging for geolocation denial/failure and still allow manual entry. Use shadcn-ui components (e.g., Button, Card, Input, Label, Alert/Callout if available) for consistent UI (verify the component's usage instructions before implementing)."
+        },
+        {
+          "path": "frontend/src/pages/BuyNowPage.tsx",
+          "operation": "modify",
+          "description": "Change the post-selection navigation so clicking “Buy Now” routes to the new address confirmation page, carrying the selected productId forward in the router search params rather than going directly to /payment-options."
+        },
+        {
+          "path": "frontend/src/utils/checkoutFlow.ts",
+          "operation": "create",
+          "description": "Add small, focused helpers to serialize/deserialize checkout search params for the flow (productId + either manual address text or geolocation lat/lng), to keep navigation payloads consistent between /buy-now → /address-confirmation → /payment-options."
+        }
+      ]
+    },
+    {
+      "id": "REQ-10",
+      "summary": "Register the new address confirmation route and make /payment-options resilient to missing address/location data.",
+      "acceptanceCriteria": [
+        "The app router includes a new route for the address confirmation page, and visiting the route directly renders the page without crashing.",
+        "/payment-options continues to work when opened directly (e.g., no address data present) by showing a reasonable fallback state (e.g., prompting the user to go back to confirm address or continuing with missing address clearly indicated).",
+        "The existing product-aware order summary behavior remains functional when productId is present."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Register a new TanStack Router route for the address confirmation page and wire it into the route tree. Add/adjust validateSearch typing for the new route and update /payment-options search validation to accept productId plus optional address/location fields, allowing direct navigation without crashes."
+        },
+        {
+          "path": "frontend/src/pages/PaymentOptionsPage.tsx",
+          "operation": "modify",
+          "description": "Update /payment-options to read optional confirmed address/location data from router search params and render a clear fallback state when missing (e.g., an English warning + CTA to go back/confirm address), while keeping existing product-aware order summary behavior intact when productId is present. Use existing shadcn-ui components already used in the page (verify the component's usage instructions before implementing)."
+        },
+        {
+          "path": "frontend/src/pages/AddressConfirmationPage.tsx",
+          "operation": "modify",
+          "description": "Ensure the page supports direct URL navigation by handling missing productId gracefully (English message + navigation back to /buy-now), and confirm action navigates to /payment-options with the validated productId and confirmed address/location data in search params. Use shadcn-ui components for the fallback UI (verify the component's usage instructions before implementing)."
+        }
+      ]
+    },
+    {
+      "id": "REQ-11",
+      "summary": "Require method-specific payment details on /payment-options before proceeding to success.",
+      "acceptanceCriteria": [
+        "When the user selects the \"Credit/Debit Card\" method, the page displays a card details form (at minimum: card number, expiry date, and CVV) and disables proceeding until the required fields are filled with basic validation.",
+        "When the user selects the \"Mobile Payment\" method, the page displays a phone number input and disables proceeding until a non-empty phone number is provided (basic validation).",
+        "When a method that requires extra details is selected, clicking the primary proceed action does not navigate to /payment-success unless the required method-specific inputs are valid.",
+        "All new labels, helper text, and validation messages are in English."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/PaymentOptionsPage.tsx",
+          "operation": "modify",
+          "description": "Add conditional, method-specific form sections: (1) Credit/Debit Card shows and requires card number, expiry date, and CVV with basic validation; (2) Mobile Payment shows and requires a phone number with basic validation. Disable the primary proceed action until the selected method’s required fields are valid, and prevent navigation to /payment-success otherwise. Keep all labels/help/validation messages in English. Use shadcn-ui form building blocks already in use (e.g., Card, Button, Label, Input) without modifying frontend/src/components/ui (verify the component's usage instructions before implementing)."
+        }
+      ]
+    }
+  ]
+}

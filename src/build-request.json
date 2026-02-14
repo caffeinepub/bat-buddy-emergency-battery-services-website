@@ -1,0 +1,95 @@
+{
+  "kind": "build_request",
+  "title": "Fix branding text and add address + payment detail steps to Bolt Now checkout flow",
+  "priority": "normal",
+  "requirements": [
+    {
+      "id": "REQ-8",
+      "text": "Update the Payment Successful page copy to replace any instance of \"Volt Now\"/\"VOLTNOW\" with \"Bolt Now\" (case-insensitive), using English user-facing text.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-user-1"
+        ],
+        "quotes": [
+          "At payment successfull page it is showing volt now . Change all the volt now to Bolt Now."
+        ]
+      },
+      "acceptanceCriteria": [
+        "On /payment-success, the thank-you/brand text says \"Bolt Now\" and does not contain \"Volt Now\" or \"VOLTNOW\" anywhere on the page.",
+        "All user-facing text remains in English."
+      ]
+    },
+    {
+      "id": "REQ-9",
+      "text": "Insert an address/location confirmation step between product selection and payment options: after a user selects a battery/product on /buy-now, redirect them to a new address confirmation page where they can either (a) share current location via the browser's GPS/geolocation permission prompt or (b) manually enter an address; only after confirming an address/location should the flow continue to /payment-options.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-user-1"
+        ],
+        "quotes": [
+          "After selecting the battery, it should redirect to page asking their address or current location by turning on GPS system. When address is confirmed, it should redirect to payment options."
+        ]
+      },
+      "acceptanceCriteria": [
+        "Clicking \"Buy Now\" on /buy-now navigates to a new address confirmation route (new page) instead of navigating directly to /payment-options.",
+        "The address confirmation page provides: (1) a button to request current location using the browser geolocation API (which triggers the browser permission prompt), and (2) a manual address input option.",
+        "The user cannot continue to /payment-options until they have confirmed either a geolocation result (lat/lng) or a non-empty manual address.",
+        "After confirming, navigation proceeds to /payment-options while preserving the selected productId and the confirmed address/location data.",
+        "If the user denies geolocation permission or an error occurs, the UI shows an English error message and still allows manual address entry and confirmation."
+      ]
+    },
+    {
+      "id": "REQ-10",
+      "text": "Register the new address confirmation route in the TanStack Router configuration and ensure direct navigation via URL works; update navigation/search parameter handling so /payment-options can receive both productId and the confirmed address/location data with a reasonable fallback when opened directly.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-user-1"
+        ],
+        "quotes": [
+          "After selecting the battery, it should redirect to page asking their address or current location... When address is confirmed, it should redirect to payment options."
+        ]
+      },
+      "acceptanceCriteria": [
+        "The app router includes a new route for the address confirmation page, and visiting the route directly renders the page without crashing.",
+        "/payment-options continues to work when opened directly (e.g., no address data present) by showing a reasonable fallback state (e.g., prompting the user to go back to confirm address or continuing with missing address clearly indicated).",
+        "The existing product-aware order summary behavior remains functional when productId is present."
+      ]
+    },
+    {
+      "id": "REQ-11",
+      "text": "On /payment-options, collect payment-method-specific details before allowing the user to proceed: selecting \"Credit/Debit Card\" must show and require card detail fields; selecting \"Mobile Payment\" must show and require a phone number field; other payment methods may proceed without extra fields unless already required by existing UI logic.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-user-1"
+        ],
+        "quotes": [
+          "Also, payment via credit / debit card should ask for cards details. Mobile payments should ask for phone number ."
+        ]
+      },
+      "acceptanceCriteria": [
+        "When the user selects the \"Credit/Debit Card\" method, the page displays a card details form (at minimum: card number, expiry date, and CVV) and disables proceeding until the required fields are filled with basic validation.",
+        "When the user selects the \"Mobile Payment\" method, the page displays a phone number input and disables proceeding until a non-empty phone number is provided (basic validation).",
+        "When a method that requires extra details is selected, clicking the primary proceed action does not navigate to /payment-success unless the required method-specific inputs are valid.",
+        "All new labels, helper text, and validation messages are in English."
+      ]
+    }
+  ],
+  "constraints": [
+    "Frontend immutable paths must not be edited: frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, frontend/src/components/ui.",
+    "Use only browser geolocation permission flows for GPS/location (no third-party map/location SDK integrations).",
+    "Do not add new backend services or external databases; keep changes within the existing single-actor Motoko backend (no backend changes required for this request unless strictly necessary)."
+  ],
+  "nonGoals": [
+    "Implementing real payment processing or integrating with payment gateways.",
+    "Persisting address/payment details to the backend as part of this request (unless explicitly required later).",
+    "Adding map UI, reverse-geocoding, or third-party location autocomplete services."
+  ],
+  "imageRequirements": {
+    "required": [],
+    "edits": []
+  }
+}

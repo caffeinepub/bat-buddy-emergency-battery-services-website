@@ -1,0 +1,137 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectStateVersion": 7,
+  "summary": "App includes a 'Buy now' (Bolt Now) flow with product selection, address/GPS confirmation before payment options, and payment-method-specific detail collection (card details or phone number), plus corrected branding text on the payment success page.",
+  "architectural_notes": [
+    "Introduce pre-payment step: product/battery selection -> address/GPS confirmation -> /payment-options."
+  ],
+  "known_issues": [
+    "Payment successful page shows incorrect text \"Volt Now\" instead of \"Bolt Now\"."
+  ],
+  "isFixRequest": true,
+  "existing_features": [
+    {
+      "id": "feature-add-a-new-top-level-navigation-option-labeled-buy-now-in-the-site-header-desktop-mobile-that-navigates-to-a-new-route-buy-now",
+      "title": "Add a new top-level navigation option labeled \"Buy Now\" in the site header (desktop + mobile) that navigates to a new route \"/buy-now\".",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-a-new-page-at-route-buy-now-that-displays-all-uploaded-images-in-a-responsive-grid-list-with-a-visible-buy-now-action-for-each-image-item",
+      "title": "Create a new page at route \"/buy-now\" that displays all uploaded images in a responsive grid/list, with a visible \"Buy Now\" action for each image item.",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-a-new-route-payment-options-and-redirect-users-there-when-they-click-any-buy-now-button-on-the-buy-now-page",
+      "title": "Implement a new route \"/payment-options\" and redirect users there when they click any \"Buy Now\" button on the \"/buy-now\" page.",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-register-the-new-frontend-routes-buy-now-and-payment-options-in-the-router-configuration-so-direct-navigation-via-url-works",
+      "title": "Register the new frontend routes (\"/buy-now\" and \"/payment-options\") in the router configuration so direct navigation via URL works.",
+      "reqIds": [
+        "REQ-4"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-enhance-the-payment-options-page-layout-and-content-to-provide-a-clearer-more-polished-payment-selection-experience-consistent-with-the-rest-of-the-site-styling",
+      "title": "Enhance the /payment-options page layout and content to provide a clearer, more polished payment selection experience consistent with the rest of the site styling.",
+      "reqIds": [
+        "REQ-5"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-replace-the-current-placeholder-proceed-behavior-browser-alert-with-an-in-app-continuation-flow-from-payment-options-that-routes-the-user-to-an-existing-result-page-when-they-click-the-primary-action",
+      "title": "Replace the current placeholder proceed behavior (browser alert) with an in-app continuation flow from /payment-options that routes the user to an existing result page when they click the primary action.",
+      "reqIds": [
+        "REQ-6"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-show-a-lightweight-order-summary-on-payment-options-based-on-the-product-the-user-clicked-on-the-buy-now-page-and-ensure-buy-now-passes-enough-information-during-navigation-for-payment-options-to-render-that-summary-with-a-reasonable-fallback-when-opened-directly",
+      "title": "Show a lightweight order summary on /payment-options based on the product the user clicked on the /buy-now page, and ensure /buy-now passes enough information during navigation for /payment-options to render that summary (with a reasonable fallback when opened directly).",
+      "reqIds": [
+        "REQ-7"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-payment-successful-page-copy-to-replace-any-instance-of-volt-now-voltnow-with-bolt-now-case-insensitive-using-english-user-facing-text",
+      "title": "Update the Payment Successful page copy to replace any instance of \"Volt Now\"/\"VOLTNOW\" with \"Bolt Now\" (case-insensitive), using English user-facing text.",
+      "reqIds": [
+        "REQ-8"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-insert-an-address-location-confirmation-step-between-product-selection-and-payment-options-after-a-user-selects-a-battery-product-on-buy-now-redirect-them-to-a-new-address-confirmation-page-where-they-can-either-a-share-current-location-via-the-browser-s-gps-geolocation-permission-prompt-or-b-manually-enter-an-address-only-after-confirming-an-address-location-should-the-flow-continue-to-payment-options",
+      "title": "Insert an address/location confirmation step between product selection and payment options: after a user selects a battery/product on /buy-now, redirect them to a new address confirmation page where they can either (a) share current location via the browser's GPS/geolocation permission prompt or (b) manually enter an address; only after confirming an address/location should the flow continue to /payment-options.",
+      "reqIds": [
+        "REQ-9"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-register-the-new-address-confirmation-route-in-the-tanstack-router-configuration-and-ensure-direct-navigation-via-url-works-update-navigation-search-parameter-handling-so-payment-options-can-receive-both-productid-and-the-confirmed-address-location-data-with-a-reasonable-fallback-when-opened-directly",
+      "title": "Register the new address confirmation route in the TanStack Router configuration and ensure direct navigation via URL works; update navigation/search parameter handling so /payment-options can receive both productId and the confirmed address/location data with a reasonable fallback when opened directly.",
+      "reqIds": [
+        "REQ-10"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-on-payment-options-collect-payment-method-specific-details-before-allowing-the-user-to-proceed-selecting-credit-debit-card-must-show-and-require-card-detail-fields-selecting-mobile-payment-must-show-and-require-a-phone-number-field-other-payment-methods-may-proceed-without-extra-fields-unless-already-required-by-existing-ui-logic",
+      "title": "On /payment-options, collect payment-method-specific details before allowing the user to proceed: selecting \"Credit/Debit Card\" must show and require card detail fields; selecting \"Mobile Payment\" must show and require a phone number field; other payment methods may proceed without extra fields unless already required by existing UI logic.",
+      "reqIds": [
+        "REQ-11"
+      ],
+      "version": 1
+    }
+  ],
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "Add a 'Buy now' option/tab that shows the provided images and includes a Buy Now action that redirects to payment options.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-2",
+      "summary": "Enhance the /payment-options payment screen UX/UI (improve layout/content and overall payment selection experience).",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-3",
+      "summary": "Fix copy/branding on the payment successful page: change all instances of \"Volt Now\" to \"Bolt Now\".",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-4",
+      "summary": "After selecting the battery/product, redirect to an address confirmation page that can request current location via GPS; once confirmed, continue to /payment-options.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-5",
+      "summary": "On /payment-options, collect payment-method-specific details: credit/debit card requires card details; mobile payments require phone number.",
+      "reqIds": [],
+      "status": "pending"
+    }
+  ],
+  "projectName": "Add 'Buy Now' tab with product images and redirect to payment options",
+  "clarification_mode": "instant",
+  "clarification_rounds": 0
+}

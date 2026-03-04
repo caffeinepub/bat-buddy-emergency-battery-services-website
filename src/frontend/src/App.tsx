@@ -16,7 +16,6 @@ import AddressConfirmationPage from "./pages/AddressConfirmationPage";
 import AdminDashboard from "./pages/AdminDashboard";
 import BatteryPriceListPage from "./pages/BatteryPriceListPage";
 import BookingPage from "./pages/BookingPage";
-import BuyNowPage from "./pages/BuyNowPage";
 import HomePage from "./pages/HomePage";
 import PaymentFailure from "./pages/PaymentFailure";
 import PaymentOptionsPage from "./pages/PaymentOptionsPage";
@@ -39,12 +38,6 @@ const bookingRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/booking",
   component: BookingPage,
-});
-
-const buyNowRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/buy-now",
-  component: BuyNowPage,
 });
 
 const batteryPricesRoute = createRoute({
@@ -121,7 +114,6 @@ const paymentFailureRoute = createRoute({
 const routeTree = rootRoute.addChildren([
   indexRoute,
   bookingRoute,
-  buyNowRoute,
   batteryPricesRoute,
   addressConfirmationRoute,
   paymentOptionsRoute,

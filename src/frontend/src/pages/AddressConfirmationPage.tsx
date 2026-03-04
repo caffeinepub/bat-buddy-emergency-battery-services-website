@@ -66,10 +66,10 @@ export default function AddressConfirmationPage() {
             </CardHeader>
             <CardContent>
               <Button
-                onClick={() => navigate({ to: "/buy-now" })}
+                onClick={() => navigate({ to: "/battery-prices" })}
                 className="w-full"
               >
-                Go to Buy Now
+                Go to Battery Prices
               </Button>
             </CardContent>
           </Card>
@@ -167,7 +167,7 @@ export default function AddressConfirmationPage() {
           <div className="max-w-2xl mx-auto">
             <Button
               variant="ghost"
-              onClick={() => navigate({ to: "/buy-now" })}
+              onClick={() => navigate({ to: "/battery-prices" })}
               className="mb-6"
             >
               <ArrowLeft className="mr-2 h-4 w-4" />

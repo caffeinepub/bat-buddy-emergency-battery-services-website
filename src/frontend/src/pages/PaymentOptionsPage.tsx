@@ -132,7 +132,7 @@ export default function PaymentOptionsPage() {
           <div className="max-w-5xl mx-auto">
             <Button
               variant="ghost"
-              onClick={() => navigate({ to: "/buy-now" })}
+              onClick={() => navigate({ to: "/battery-prices" })}
               className="mb-6"
             >
               <ArrowLeft className="mr-2 h-4 w-4" />

@@ -47,7 +47,7 @@ export default function Footer() {
                   href="/battery-prices"
                   className="hover:text-primary transition-colors"
                 >
-                  Battery Prices
+                  Buy Now
                 </a>
               </li>
             </ul>

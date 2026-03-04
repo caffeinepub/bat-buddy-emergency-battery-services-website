@@ -1,5 +1,5 @@
-import { Heart, Mail } from 'lucide-react';
-import { SiFacebook, SiInstagram, SiX, SiWhatsapp } from 'react-icons/si';
+import { Heart, Mail } from "lucide-react";
+import { SiFacebook, SiInstagram, SiWhatsapp, SiX } from "react-icons/si";
 
 export default function Footer() {
   return (
@@ -8,10 +8,18 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
             <div className="mb-4 flex items-center gap-3">
-              <img src="/assets/IMG-20260128-WA0008.jpg" alt="BAT-BUDDY Logo" className="h-16 w-auto" />
+              <img
+                src="/assets/IMG-20260128-WA0008.jpg"
+                alt="BAT-BUDDY Logo"
+                className="h-16 w-auto"
+              />
               <div className="flex flex-col">
-                <span className="text-xl font-bold text-primary">BAT‑BUDDY</span>
-                <span className="text-xs text-gray-400">Power When You Need It.</span>
+                <span className="text-xl font-bold text-primary">
+                  BAT‑BUDDY
+                </span>
+                <span className="text-xs text-gray-400">
+                  Power When You Need It.
+                </span>
               </div>
             </div>
             <p className="text-gray-400 text-sm">
@@ -27,13 +35,11 @@ export default function Footer() {
                 </a>
               </li>
               <li>
-                <a href="/booking" className="hover:text-primary transition-colors">
+                <a
+                  href="/booking"
+                  className="hover:text-primary transition-colors"
+                >
                   Book Service
-                </a>
-              </li>
-              <li>
-                <a href="/battery-prices" className="hover:text-primary transition-colors">
-                  Battery Prices
                 </a>
               </li>
             </ul>
@@ -51,7 +57,10 @@ export default function Footer() {
             <h4 className="font-semibold mb-4">Contact</h4>
             <ul className="space-y-2 text-sm text-gray-400">
               <li>
-                <a href="tel:+971559952721" className="hover:text-primary transition-colors">
+                <a
+                  href="tel:+971559952721"
+                  className="hover:text-primary transition-colors"
+                >
                   Phone: 055 995 2721
                 </a>
               </li>
@@ -96,13 +105,28 @@ export default function Footer() {
               </a>
             </div>
             <div className="flex gap-4 mt-4">
-              <a href="#" className="text-gray-400 hover:text-primary transition-colors">
+              <a
+                href="https://www.facebook.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-400 hover:text-primary transition-colors"
+              >
                 <SiFacebook className="h-5 w-5" />
               </a>
-              <a href="#" className="text-gray-400 hover:text-primary transition-colors">
+              <a
+                href="https://www.instagram.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-400 hover:text-primary transition-colors"
+              >
                 <SiInstagram className="h-5 w-5" />
               </a>
-              <a href="#" className="text-gray-400 hover:text-primary transition-colors">
+              <a
+                href="https://www.x.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-400 hover:text-primary transition-colors"
+              >
                 <SiX className="h-5 w-5" />
               </a>
             </div>
@@ -110,8 +134,12 @@ export default function Footer() {
         </div>
         <div className="border-t border-gray-800 mt-8 pt-8 text-center text-sm text-gray-400">
           <p className="flex items-center justify-center gap-1">
-            © 2025. Built with <Heart className="h-4 w-4 text-red-500 fill-red-500" /> using{' '}
-            <a href="https://caffeine.ai" className="text-primary hover:text-primary/80 transition-colors">
+            © 2025. Built with{" "}
+            <Heart className="h-4 w-4 text-red-500 fill-red-500" /> using{" "}
+            <a
+              href="https://caffeine.ai"
+              className="text-primary hover:text-primary/80 transition-colors"
+            >
               caffeine.ai
             </a>
           </p>

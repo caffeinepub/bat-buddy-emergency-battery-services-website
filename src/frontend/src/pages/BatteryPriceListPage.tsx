@@ -1,56 +1,90 @@
-import { useState, useMemo } from 'react';
-import { useGetAllBatteryPrices } from '../hooks/useQueries';
-import { BatteryPrice } from '../backend';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { Search, ArrowUpDown, ArrowUp, ArrowDown, Battery as BatteryIcon } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  ArrowDown,
+  ArrowUp,
+  ArrowUpDown,
+  Battery as BatteryIcon,
+  Search,
+} from "lucide-react";
+import { useMemo, useState } from "react";
+import { BatteryPrice } from "../backend";
+import { useGetAllBatteryPrices } from "../hooks/useQueries";
 
-type SortField = 'brand' | 'model' | 'batteryType' | 'batterySize' | 'economyPrice' | 'standardPrice' | 'premiumPrice';
-type SortDirection = 'asc' | 'desc';
+type SortField =
+  | "brand"
+  | "model"
+  | "batteryType"
+  | "batterySize"
+  | "economyPrice"
+  | "standardPrice"
+  | "premiumPrice";
+type SortDirection = "asc" | "desc";
 
 export default function BatteryPriceListPage() {
   const { data: batteryPrices = [], isLoading } = useGetAllBatteryPrices();
-  
-  const [searchTerm, setSearchTerm] = useState('');
-  const [brandFilter, setBrandFilter] = useState<string>('all');
-  const [modelFilter, setModelFilter] = useState<string>('all');
-  const [typeFilter, setTypeFilter] = useState<string>('all');
-  const [sortField, setSortField] = useState<SortField>('brand');
-  const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
+
+  const [searchTerm, setSearchTerm] = useState("");
+  const [brandFilter, setBrandFilter] = useState<string>("all");
+  const [modelFilter, setModelFilter] = useState<string>("all");
+  const [typeFilter, setTypeFilter] = useState<string>("all");
+  const [sortField, setSortField] = useState<SortField>("brand");
+  const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
 
   // Extract unique values for filters
   const uniqueBrands = useMemo(() => {
-    const brands = new Set(batteryPrices.map(p => p.brand));
+    const brands = new Set(batteryPrices.map((p) => p.brand));
     return Array.from(brands).sort();
   }, [batteryPrices]);
 
   const uniqueModels = useMemo(() => {
-    const models = new Set(batteryPrices.map(p => p.model));
+    const models = new Set(batteryPrices.map((p) => p.model));
     return Array.from(models).sort();
   }, [batteryPrices]);
 
   const uniqueTypes = useMemo(() => {
-    const types = new Set(batteryPrices.map(p => p.batteryType));
+    const types = new Set(batteryPrices.map((p) => p.batteryType));
     return Array.from(types).sort();
   }, [batteryPrices]);
 
   // Filter and sort data
   const filteredAndSortedPrices = useMemo(() => {
-    let filtered = batteryPrices.filter(price => {
-      const matchesSearch = searchTerm === '' || 
+    let filtered = batteryPrices.filter((price) => {
+      const matchesSearch =
+        searchTerm === "" ||
         price.brand.toLowerCase().includes(searchTerm.toLowerCase()) ||
         price.model.toLowerCase().includes(searchTerm.toLowerCase()) ||
         price.batteryType.toLowerCase().includes(searchTerm.toLowerCase()) ||
         price.batterySize.toLowerCase().includes(searchTerm.toLowerCase());
-      
-      const matchesBrand = brandFilter === 'all' || price.brand === brandFilter;
-      const matchesModel = modelFilter === 'all' || price.model === modelFilter;
-      const matchesType = typeFilter === 'all' || price.batteryType === typeFilter;
+
+      const matchesBrand = brandFilter === "all" || price.brand === brandFilter;
+      const matchesModel = modelFilter === "all" || price.model === modelFilter;
+      const matchesType =
+        typeFilter === "all" || price.batteryType === typeFilter;
 
       return matchesSearch && matchesBrand && matchesModel && matchesType;
     });
@@ -60,36 +94,46 @@ export default function BatteryPriceListPage() {
       let aValue: string | number = a[sortField];
       let bValue: string | number = b[sortField];
 
-      if (typeof aValue === 'string' && typeof bValue === 'string') {
-        return sortDirection === 'asc' 
+      if (typeof aValue === "string" && typeof bValue === "string") {
+        return sortDirection === "asc"
           ? aValue.localeCompare(bValue)
           : bValue.localeCompare(aValue);
       }
 
-      if (typeof aValue === 'number' && typeof bValue === 'number') {
-        return sortDirection === 'asc' ? aValue - bValue : bValue - aValue;
+      if (typeof aValue === "number" && typeof bValue === "number") {
+        return sortDirection === "asc" ? aValue - bValue : bValue - aValue;
       }
 
       return 0;
     });
 
     return filtered;
-  }, [batteryPrices, searchTerm, brandFilter, modelFilter, typeFilter, sortField, sortDirection]);
+  }, [
+    batteryPrices,
+    searchTerm,
+    brandFilter,
+    modelFilter,
+    typeFilter,
+    sortField,
+    sortDirection,
+  ]);
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
     } else {
       setSortField(field);
-      setSortDirection('asc');
+      setSortDirection("asc");
     }
   };
 
   const SortIcon = ({ field }: { field: SortField }) => {
     if (sortField !== field) return <ArrowUpDown className="h-4 w-4 ml-1" />;
-    return sortDirection === 'asc' 
-      ? <ArrowUp className="h-4 w-4 ml-1" />
-      : <ArrowDown className="h-4 w-4 ml-1" />;
+    return sortDirection === "asc" ? (
+      <ArrowUp className="h-4 w-4 ml-1" />
+    ) : (
+      <ArrowDown className="h-4 w-4 ml-1" />
+    );
   };
 
   const formatPrice = (price: number, discount: number) => {
@@ -120,7 +164,8 @@ export default function BatteryPriceListPage() {
             </h1>
           </div>
           <p className="text-lg text-gray-700 dark:text-gray-300 max-w-2xl mx-auto">
-            Browse our comprehensive battery catalog with transparent pricing for Economy, Standard, and Premium categories
+            Browse our comprehensive battery catalog with transparent pricing
+            for Economy, Standard, and Premium categories
           </p>
         </div>
 
@@ -158,8 +203,10 @@ export default function BatteryPriceListPage() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Brands</SelectItem>
-                    {uniqueBrands.map(brand => (
-                      <SelectItem key={brand} value={brand}>{brand}</SelectItem>
+                    {uniqueBrands.map((brand) => (
+                      <SelectItem key={brand} value={brand}>
+                        {brand}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -174,8 +221,10 @@ export default function BatteryPriceListPage() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Models</SelectItem>
-                    {uniqueModels.map(model => (
-                      <SelectItem key={model} value={model}>{model}</SelectItem>
+                    {uniqueModels.map((model) => (
+                      <SelectItem key={model} value={model}>
+                        {model}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -190,8 +239,10 @@ export default function BatteryPriceListPage() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Types</SelectItem>
-                    {uniqueTypes.map(type => (
-                      <SelectItem key={type} value={type}>{type}</SelectItem>
+                    {uniqueTypes.map((type) => (
+                      <SelectItem key={type} value={type}>
+                        {type}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -200,7 +251,8 @@ export default function BatteryPriceListPage() {
 
             {/* Results Count */}
             <div className="mt-4 text-sm text-gray-600 dark:text-gray-400">
-              Showing {filteredAndSortedPrices.length} of {batteryPrices.length} batteries
+              Showing {filteredAndSortedPrices.length} of {batteryPrices.length}{" "}
+              batteries
             </div>
           </CardContent>
         </Card>
@@ -211,15 +263,21 @@ export default function BatteryPriceListPage() {
             {isLoading ? (
               <div className="flex items-center justify-center py-12">
                 <div className="text-center">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-600 mx-auto mb-4"></div>
-                  <p className="text-gray-600 dark:text-gray-400">Loading battery prices...</p>
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-600 mx-auto mb-4" />
+                  <p className="text-gray-600 dark:text-gray-400">
+                    Loading battery prices...
+                  </p>
                 </div>
               </div>
             ) : filteredAndSortedPrices.length === 0 ? (
               <div className="text-center py-12">
                 <BatteryIcon className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-600 dark:text-gray-400 text-lg">No batteries found matching your criteria</p>
-                <p className="text-gray-500 dark:text-gray-500 text-sm mt-2">Try adjusting your filters</p>
+                <p className="text-gray-600 dark:text-gray-400 text-lg">
+                  No batteries found matching your criteria
+                </p>
+                <p className="text-gray-500 dark:text-gray-500 text-sm mt-2">
+                  Try adjusting your filters
+                </p>
               </div>
             ) : (
               <div className="overflow-x-auto">
@@ -230,7 +288,7 @@ export default function BatteryPriceListPage() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => handleSort('brand')}
+                          onClick={() => handleSort("brand")}
                           className="font-semibold flex items-center"
                         >
                           Brand
@@ -241,7 +299,7 @@ export default function BatteryPriceListPage() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => handleSort('model')}
+                          onClick={() => handleSort("model")}
                           className="font-semibold flex items-center"
                         >
                           Model
@@ -252,7 +310,7 @@ export default function BatteryPriceListPage() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => handleSort('batteryType')}
+                          onClick={() => handleSort("batteryType")}
                           className="font-semibold flex items-center"
                         >
                           Type
@@ -263,7 +321,7 @@ export default function BatteryPriceListPage() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => handleSort('batterySize')}
+                          onClick={() => handleSort("batterySize")}
                           className="font-semibold flex items-center"
                         >
                           Size
@@ -274,7 +332,7 @@ export default function BatteryPriceListPage() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => handleSort('economyPrice')}
+                          onClick={() => handleSort("economyPrice")}
                           className="font-semibold flex items-center"
                         >
                           Economy
@@ -285,7 +343,7 @@ export default function BatteryPriceListPage() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => handleSort('standardPrice')}
+                          onClick={() => handleSort("standardPrice")}
                           className="font-semibold flex items-center"
                         >
                           Standard
@@ -296,7 +354,7 @@ export default function BatteryPriceListPage() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => handleSort('premiumPrice')}
+                          onClick={() => handleSort("premiumPrice")}
                           className="font-semibold flex items-center"
                         >
                           Premium
@@ -306,22 +364,36 @@ export default function BatteryPriceListPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredAndSortedPrices.map((price, index) => (
-                      <TableRow key={index} className="hover:bg-amber-50/50 dark:hover:bg-gray-800/50">
-                        <TableCell className="font-medium">{price.brand}</TableCell>
+                    {filteredAndSortedPrices.map((price) => (
+                      <TableRow
+                        key={`${price.brand}-${price.model}-${price.batteryType}`}
+                        className="hover:bg-amber-50/50 dark:hover:bg-gray-800/50"
+                      >
+                        <TableCell className="font-medium">
+                          {price.brand}
+                        </TableCell>
                         <TableCell>{price.model}</TableCell>
                         <TableCell>
                           <Badge variant="outline">{price.batteryType}</Badge>
                         </TableCell>
                         <TableCell>{price.batterySize}</TableCell>
                         <TableCell>
-                          {formatPrice(price.economyPrice, price.economyDiscount)}
+                          {formatPrice(
+                            price.economyPrice,
+                            price.economyDiscount,
+                          )}
                         </TableCell>
                         <TableCell>
-                          {formatPrice(price.standardPrice, price.standardDiscount)}
+                          {formatPrice(
+                            price.standardPrice,
+                            price.standardDiscount,
+                          )}
                         </TableCell>
                         <TableCell>
-                          {formatPrice(price.premiumPrice, price.premiumDiscount)}
+                          {formatPrice(
+                            price.premiumPrice,
+                            price.premiumDiscount,
+                          )}
                         </TableCell>
                       </TableRow>
                     ))}
@@ -340,7 +412,8 @@ export default function BatteryPriceListPage() {
             </CardHeader>
             <CardContent>
               <p className="text-sm text-gray-700 dark:text-gray-300">
-                Budget-friendly option with reliable performance and 12-month warranty
+                Budget-friendly option with reliable performance and 12-month
+                warranty
               </p>
             </CardContent>
           </Card>
@@ -362,7 +435,8 @@ export default function BatteryPriceListPage() {
             </CardHeader>
             <CardContent>
               <p className="text-sm text-gray-700 dark:text-gray-300">
-                Top-tier performance with advanced technology and 24-month warranty
+                Top-tier performance with advanced technology and 24-month
+                warranty
               </p>
             </CardContent>
           </Card>

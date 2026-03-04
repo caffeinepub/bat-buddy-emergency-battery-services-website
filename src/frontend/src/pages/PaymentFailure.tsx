@@ -1,9 +1,15 @@
-import { useNavigate } from '@tanstack/react-router';
-import Header from '../components/Header';
-import Footer from '../components/Footer';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { XCircle } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { useNavigate } from "@tanstack/react-router";
+import { XCircle } from "lucide-react";
+import Footer from "../components/Footer";
+import Header from "../components/Header";
 
 export default function PaymentFailure() {
   const navigate = useNavigate();
@@ -22,20 +28,27 @@ export default function PaymentFailure() {
                 </div>
               </div>
               <CardTitle className="text-2xl">Payment Failed</CardTitle>
-              <CardDescription>We couldn't process your payment</CardDescription>
+              <CardDescription>
+                We couldn't process your payment
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-center text-muted-foreground">
-                Your payment was not successful. Please try again or contact our support team for assistance.
+                Your payment was not successful. Please try again or contact our
+                support team for assistance.
               </p>
               <div className="space-y-2">
                 <Button
-                  onClick={() => navigate({ to: '/booking' })}
+                  onClick={() => navigate({ to: "/booking" })}
                   className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600"
                 >
                   Try Again
                 </Button>
-                <Button onClick={() => navigate({ to: '/' })} variant="outline" className="w-full">
+                <Button
+                  onClick={() => navigate({ to: "/" })}
+                  variant="outline"
+                  className="w-full"
+                >
                   Return to Home
                 </Button>
               </div>

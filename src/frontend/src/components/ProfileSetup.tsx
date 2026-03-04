@@ -1,24 +1,30 @@
-import { useState } from 'react';
-import { useSaveCallerUserProfile } from '../hooks/useQueries';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { toast } from 'sonner';
-import { Zap } from 'lucide-react';
-import { Variant_technician_admin_customer } from '../backend';
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Zap } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
+import { Variant_technician_admin_customer } from "../backend";
+import { useSaveCallerUserProfile } from "../hooks/useQueries";
 
 export default function ProfileSetup() {
-  const [name, setName] = useState('');
-  const [phone, setPhone] = useState('');
-  const [email, setEmail] = useState('');
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
   const saveProfile = useSaveCallerUserProfile();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!name.trim() || !phone.trim() || !email.trim()) {
-      toast.error('Please fill in all fields');
+      toast.error("Please fill in all fields");
       return;
     }
 
@@ -30,10 +36,10 @@ export default function ProfileSetup() {
         userType: Variant_technician_admin_customer.customer,
         technicianId: undefined,
       });
-      toast.success('Profile created successfully!');
+      toast.success("Profile created successfully!");
     } catch (error) {
-      console.error('Profile setup error:', error);
-      toast.error('Failed to create profile. Please try again.');
+      console.error("Profile setup error:", error);
+      toast.error("Failed to create profile. Please try again.");
     }
   };
 
@@ -45,7 +51,9 @@ export default function ProfileSetup() {
             <Zap className="h-8 w-8 text-amber-500 fill-amber-500" />
             <CardTitle className="text-2xl">Welcome to VOLTNOW</CardTitle>
           </div>
-          <CardDescription>Please complete your profile to continue</CardDescription>
+          <CardDescription>
+            Please complete your profile to continue
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -87,7 +95,7 @@ export default function ProfileSetup() {
               className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600"
               disabled={saveProfile.isPending}
             >
-              {saveProfile.isPending ? 'Creating Profile...' : 'Complete Setup'}
+              {saveProfile.isPending ? "Creating Profile..." : "Complete Setup"}
             </Button>
           </form>
         </CardContent>

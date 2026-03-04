@@ -96,17 +96,9 @@ export interface Location {
     address: string;
     emirate: string;
 }
-export interface BatteryPrice {
-    economyPrice: number;
-    model: string;
-    premiumPrice: number;
-    premiumDiscount: number;
-    standardPrice: number;
-    economyDiscount: number;
-    batterySize: string;
-    batteryType: string;
-    brand: string;
-    standardDiscount: number;
+export interface _CaffeineStorageRefillResult {
+    success?: boolean;
+    topped_up_amount?: bigint;
 }
 export interface TransformationOutput {
     status: bigint;
@@ -114,26 +106,8 @@ export interface TransformationOutput {
     headers: Array<http_header>;
 }
 export type Time = bigint;
-export interface StoreLocation {
-    id: string;
-    latitude: number;
-    name: string;
-    longitude: number;
-    address: string;
-    phone: string;
-}
 export interface _CaffeineStorageRefillInformation {
     proposed_top_up_amount?: bigint;
-}
-export interface BookingInput {
-    serviceType: ServiceType;
-    batteryId?: string;
-    customerId: string;
-    location: Location;
-}
-export interface _CaffeineStorageCreateCertificateResult {
-    method: string;
-    blob_hash: string;
 }
 export interface Battery {
     id: string;
@@ -144,50 +118,13 @@ export interface Battery {
     capacity: bigint;
     price: bigint;
 }
-export interface Customer {
-    id: string;
-    name: string;
-    email: string;
-    address: Location;
-    phone: string;
-    serviceHistory: Array<string>;
-}
-export interface http_header {
-    value: string;
-    name: string;
-}
-export interface http_request_result {
-    status: bigint;
-    body: Uint8Array;
-    headers: Array<http_header>;
+export interface _CaffeineStorageCreateCertificateResult {
+    method: string;
+    blob_hash: string;
 }
 export interface WarrantyInput {
     batteryId: string;
     purchaseDate: Time;
-    warrantyMonths: bigint;
-    customerId: string;
-}
-export interface FleetAccount {
-    id: string;
-    vehicles: Array<string>;
-    contactName: string;
-    email: string;
-    companyName: string;
-    phone: string;
-    serviceHistory: Array<string>;
-}
-export interface ShoppingItem {
-    productName: string;
-    currency: string;
-    quantity: bigint;
-    priceInCents: bigint;
-    productDescription: string;
-}
-export interface Warranty {
-    id: string;
-    batteryId: string;
-    purchaseDate: Time;
-    isActive: boolean;
     warrantyMonths: bigint;
     customerId: string;
 }
@@ -205,10 +142,12 @@ export interface TransformationInput {
     context: Uint8Array;
     response: http_request_result;
 }
-export interface Notification {
-    to: string;
-    method: Variant_sms_whatsapp_email;
-    message: string;
+export interface BankAccountDetails {
+    swiftBic: string;
+    iban: string;
+    accountHolderName: string;
+    bankName: string;
+    accountNumber: string;
 }
 export interface Booking {
     id: string;
@@ -238,6 +177,66 @@ export interface StripeConfiguration {
     allowedCountries: Array<string>;
     secretKey: string;
 }
+export interface StoreLocation {
+    id: string;
+    latitude: number;
+    name: string;
+    longitude: number;
+    address: string;
+    phone: string;
+}
+export interface BookingInput {
+    serviceType: ServiceType;
+    batteryId?: string;
+    customerId: string;
+    location: Location;
+}
+export interface Customer {
+    id: string;
+    name: string;
+    email: string;
+    address: Location;
+    phone: string;
+    serviceHistory: Array<string>;
+}
+export interface http_header {
+    value: string;
+    name: string;
+}
+export interface http_request_result {
+    status: bigint;
+    body: Uint8Array;
+    headers: Array<http_header>;
+}
+export interface FleetAccount {
+    id: string;
+    vehicles: Array<string>;
+    contactName: string;
+    email: string;
+    companyName: string;
+    phone: string;
+    serviceHistory: Array<string>;
+}
+export interface ShoppingItem {
+    productName: string;
+    currency: string;
+    quantity: bigint;
+    priceInCents: bigint;
+    productDescription: string;
+}
+export interface Warranty {
+    id: string;
+    batteryId: string;
+    purchaseDate: Time;
+    isActive: boolean;
+    warrantyMonths: bigint;
+    customerId: string;
+}
+export interface Notification {
+    to: string;
+    method: Variant_sms_whatsapp_email;
+    message: string;
+}
 export interface UserProfile {
     userType: Variant_technician_admin_customer;
     name: string;
@@ -245,9 +244,17 @@ export interface UserProfile {
     technicianId?: string;
     phone: string;
 }
-export interface _CaffeineStorageRefillResult {
-    success?: boolean;
-    topped_up_amount?: bigint;
+export interface BatteryPrice {
+    economyPrice: number;
+    model: string;
+    premiumPrice: number;
+    premiumDiscount: number;
+    standardPrice: number;
+    economyDiscount: number;
+    batterySize: string;
+    batteryType: string;
+    brand: string;
+    standardDiscount: number;
 }
 export enum BookingStatus {
     cancelled = "cancelled",
@@ -319,6 +326,8 @@ export interface backendInterface {
     getFilteredBatteryPrices(brand: string | null, model: string | null, batteryType: string | null, batterySize: string | null, priceRange: [bigint, bigint] | null): Promise<Array<BatteryPrice>>;
     getFleetAccount(fleetId: string): Promise<FleetAccount | null>;
     getMyBookings(): Promise<Array<Booking>>;
+    getReceiverBankAccountDetails(): Promise<BankAccountDetails>;
+    getReceiverIban(): Promise<string>;
     getServiceAreas(): Promise<Array<string>>;
     getStoreLocations(): Promise<Array<StoreLocation>>;
     getStripeSessionStatus(sessionId: string): Promise<StripeSessionStatus>;
@@ -337,6 +346,7 @@ export interface backendInterface {
     updateBatteryInventory(battery: Battery): Promise<void>;
     updateBatteryPrice(index: bigint, price: BatteryPrice): Promise<void>;
     updateBookingStatus(bookingId: string, newStatus: BookingStatus): Promise<void>;
+    updateReceiverBankAccountDetails(details: BankAccountDetails): Promise<void>;
     updateTechnician(profile: TechnicianProfile): Promise<void>;
     updateTechnicianLocation(techId: string, newLocation: Location): Promise<void>;
 }
@@ -847,6 +857,34 @@ export class Backend implements backendInterface {
             return from_candid_vec_n16(this._uploadFile, this._downloadFile, result);
         }
     }
+    async getReceiverBankAccountDetails(): Promise<BankAccountDetails> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getReceiverBankAccountDetails();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getReceiverBankAccountDetails();
+            return result;
+        }
+    }
+    async getReceiverIban(): Promise<string> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getReceiverIban();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getReceiverIban();
+            return result;
+        }
+    }
     async getServiceAreas(): Promise<Array<string>> {
         if (this.processError) {
             try {
@@ -1096,6 +1134,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.updateBookingStatus(arg0, to_candid_BookingStatus_n28(this._uploadFile, this._downloadFile, arg1));
+            return result;
+        }
+    }
+    async updateReceiverBankAccountDetails(arg0: BankAccountDetails): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.updateReceiverBankAccountDetails(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.updateReceiverBankAccountDetails(arg0);
             return result;
         }
     }

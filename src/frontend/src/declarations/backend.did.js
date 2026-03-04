@@ -147,6 +147,13 @@ export const UserProfile = IDL.Record({
   'technicianId' : IDL.Opt(IDL.Text),
   'phone' : IDL.Text,
 });
+export const BankAccountDetails = IDL.Record({
+  'swiftBic' : IDL.Text,
+  'iban' : IDL.Text,
+  'accountHolderName' : IDL.Text,
+  'bankName' : IDL.Text,
+  'accountNumber' : IDL.Text,
+});
 export const StoreLocation = IDL.Record({
   'id' : IDL.Text,
   'latitude' : IDL.Float64,
@@ -285,6 +292,12 @@ export const idlService = IDL.Service({
     ),
   'getFleetAccount' : IDL.Func([IDL.Text], [IDL.Opt(FleetAccount)], ['query']),
   'getMyBookings' : IDL.Func([], [IDL.Vec(Booking)], ['query']),
+  'getReceiverBankAccountDetails' : IDL.Func(
+      [],
+      [BankAccountDetails],
+      ['query'],
+    ),
+  'getReceiverIban' : IDL.Func([], [IDL.Text], ['query']),
   'getServiceAreas' : IDL.Func([], [IDL.Vec(IDL.Text)], ['query']),
   'getStoreLocations' : IDL.Func([], [IDL.Vec(StoreLocation)], ['query']),
   'getStripeSessionStatus' : IDL.Func([IDL.Text], [StripeSessionStatus], []),
@@ -319,6 +332,7 @@ export const idlService = IDL.Service({
   'updateBatteryInventory' : IDL.Func([Battery], [], []),
   'updateBatteryPrice' : IDL.Func([IDL.Nat, BatteryPrice], [], []),
   'updateBookingStatus' : IDL.Func([IDL.Text, BookingStatus], [], []),
+  'updateReceiverBankAccountDetails' : IDL.Func([BankAccountDetails], [], []),
   'updateTechnician' : IDL.Func([TechnicianProfile], [], []),
   'updateTechnicianLocation' : IDL.Func([IDL.Text, Location], [], []),
 });
@@ -465,6 +479,13 @@ export const idlFactory = ({ IDL }) => {
     'technicianId' : IDL.Opt(IDL.Text),
     'phone' : IDL.Text,
   });
+  const BankAccountDetails = IDL.Record({
+    'swiftBic' : IDL.Text,
+    'iban' : IDL.Text,
+    'accountHolderName' : IDL.Text,
+    'bankName' : IDL.Text,
+    'accountNumber' : IDL.Text,
+  });
   const StoreLocation = IDL.Record({
     'id' : IDL.Text,
     'latitude' : IDL.Float64,
@@ -604,6 +625,12 @@ export const idlFactory = ({ IDL }) => {
         ['query'],
       ),
     'getMyBookings' : IDL.Func([], [IDL.Vec(Booking)], ['query']),
+    'getReceiverBankAccountDetails' : IDL.Func(
+        [],
+        [BankAccountDetails],
+        ['query'],
+      ),
+    'getReceiverIban' : IDL.Func([], [IDL.Text], ['query']),
     'getServiceAreas' : IDL.Func([], [IDL.Vec(IDL.Text)], ['query']),
     'getStoreLocations' : IDL.Func([], [IDL.Vec(StoreLocation)], ['query']),
     'getStripeSessionStatus' : IDL.Func([IDL.Text], [StripeSessionStatus], []),
@@ -638,6 +665,7 @@ export const idlFactory = ({ IDL }) => {
     'updateBatteryInventory' : IDL.Func([Battery], [], []),
     'updateBatteryPrice' : IDL.Func([IDL.Nat, BatteryPrice], [], []),
     'updateBookingStatus' : IDL.Func([IDL.Text, BookingStatus], [], []),
+    'updateReceiverBankAccountDetails' : IDL.Func([BankAccountDetails], [], []),
     'updateTechnician' : IDL.Func([TechnicianProfile], [], []),
     'updateTechnicianLocation' : IDL.Func([IDL.Text, Location], [], []),
   });

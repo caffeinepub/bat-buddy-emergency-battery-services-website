@@ -1,26 +1,27 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useActor } from './useActor';
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  BookingInput,
-  BookingStatus,
-  Battery,
-  BatteryPrice,
-  TechnicianProfile,
-  UserProfile,
-  Warranty,
-  WarrantyInput,
-  FleetAccount,
+  type BankAccountDetails,
+  type Battery,
+  type BatteryPrice,
+  type BookingInput,
+  type BookingStatus,
   Customer,
-} from '../backend';
+  FleetAccount,
+  type TechnicianProfile,
+  type UserProfile,
+  Warranty,
+  type WarrantyInput,
+} from "../backend";
+import { useActor } from "./useActor";
 
 // User Profile
 export function useGetCallerUserProfile() {
   const { actor, isFetching: actorFetching } = useActor();
 
   const query = useQuery<UserProfile | null>({
-    queryKey: ['currentUserProfile'],
+    queryKey: ["currentUserProfile"],
     queryFn: async () => {
-      if (!actor) throw new Error('Actor not available');
+      if (!actor) throw new Error("Actor not available");
       return actor.getCallerUserProfile();
     },
     enabled: !!actor && !actorFetching,
@@ -40,11 +41,11 @@ export function useSaveCallerUserProfile() {
 
   return useMutation({
     mutationFn: async (profile: UserProfile) => {
-      if (!actor) throw new Error('Actor not available');
+      if (!actor) throw new Error("Actor not available");
       return actor.saveCallerUserProfile(profile);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['currentUserProfile'] });
+      queryClient.invalidateQueries({ queryKey: ["currentUserProfile"] });
     },
   });
 }
@@ -54,7 +55,7 @@ export function useIsCallerAdmin() {
   const { actor, isFetching: actorFetching } = useActor();
 
   return useQuery<boolean>({
-    queryKey: ['isAdmin'],
+    queryKey: ["isAdmin"],
     queryFn: async () => {
       if (!actor) return false;
       return actor.isCallerAdmin();
@@ -68,9 +69,9 @@ export function useGetAllBookings() {
   const { actor, isFetching } = useActor();
 
   return useQuery({
-    queryKey: ['bookings'],
+    queryKey: ["bookings"],
     queryFn: async () => {
-      if (!actor) throw new Error('Actor not available');
+      if (!actor) throw new Error("Actor not available");
       return actor.getAllBookings();
     },
     enabled: !!actor && !isFetching,
@@ -81,7 +82,7 @@ export function useGetBookingsByTechnician(technicianId: string) {
   const { actor, isFetching } = useActor();
 
   return useQuery({
-    queryKey: ['bookings', 'technician', technicianId],
+    queryKey: ["bookings", "technician", technicianId],
     queryFn: async () => {
       if (!actor || !technicianId) return [];
       return actor.getBookingsByTechnician(technicianId);
@@ -94,9 +95,9 @@ export function useGetMyBookings() {
   const { actor, isFetching } = useActor();
 
   return useQuery({
-    queryKey: ['myBookings'],
+    queryKey: ["myBookings"],
     queryFn: async () => {
-      if (!actor) throw new Error('Actor not available');
+      if (!actor) throw new Error("Actor not available");
       return actor.getMyBookings();
     },
     enabled: !!actor && !isFetching,
@@ -109,11 +110,11 @@ export function useCreateBooking() {
 
   return useMutation({
     mutationFn: async (input: BookingInput) => {
-      if (!actor) throw new Error('Actor not available');
+      if (!actor) throw new Error("Actor not available");
       return actor.createBooking(input);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['bookings'] });
+      queryClient.invalidateQueries({ queryKey: ["bookings"] });
     },
   });
 }
@@ -123,12 +124,15 @@ export function useUpdateBookingStatus() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ bookingId, newStatus }: { bookingId: string; newStatus: BookingStatus }) => {
-      if (!actor) throw new Error('Actor not available');
+    mutationFn: async ({
+      bookingId,
+      newStatus,
+    }: { bookingId: string; newStatus: BookingStatus }) => {
+      if (!actor) throw new Error("Actor not available");
       return actor.updateBookingStatus(bookingId, newStatus);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['bookings'] });
+      queryClient.invalidateQueries({ queryKey: ["bookings"] });
     },
   });
 }
@@ -138,13 +142,16 @@ export function useAssignTechnician() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ bookingId, technicianId }: { bookingId: string; technicianId: string }) => {
-      if (!actor) throw new Error('Actor not available');
+    mutationFn: async ({
+      bookingId,
+      technicianId,
+    }: { bookingId: string; technicianId: string }) => {
+      if (!actor) throw new Error("Actor not available");
       return actor.assignTechnician(bookingId, technicianId);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['bookings'] });
-      queryClient.invalidateQueries({ queryKey: ['technicians'] });
+      queryClient.invalidateQueries({ queryKey: ["bookings"] });
+      queryClient.invalidateQueries({ queryKey: ["technicians"] });
     },
   });
 }
@@ -153,9 +160,9 @@ export function useGetBookingStatusCounts() {
   const { actor, isFetching } = useActor();
 
   return useQuery({
-    queryKey: ['bookingStatusCounts'],
+    queryKey: ["bookingStatusCounts"],
     queryFn: async () => {
-      if (!actor) throw new Error('Actor not available');
+      if (!actor) throw new Error("Actor not available");
       return actor.getBookingStatusCounts();
     },
     enabled: !!actor && !isFetching,
@@ -167,7 +174,7 @@ export function useGetAvailableBatteries() {
   const { actor, isFetching } = useActor();
 
   return useQuery({
-    queryKey: ['batteries'],
+    queryKey: ["batteries"],
     queryFn: async () => {
       if (!actor) return [];
       return actor.getAvailableBatteries();
@@ -176,15 +183,19 @@ export function useGetAvailableBatteries() {
   });
 }
 
-export function useFindCompatibleBatteries(make: string, model: string, year: string) {
+export function useFindCompatibleBatteries(
+  make: string,
+  model: string,
+  year: string,
+) {
   const { actor, isFetching } = useActor();
 
   return useQuery({
-    queryKey: ['compatibleBatteries', make, model, year],
+    queryKey: ["compatibleBatteries", make, model, year],
     queryFn: async () => {
       if (!actor) return [];
-      const yearNum = parseInt(year, 10);
-      if (isNaN(yearNum)) return [];
+      const yearNum = Number.parseInt(year, 10);
+      if (Number.isNaN(yearNum)) return [];
       return actor.findCompatibleBatteries(make, model, BigInt(yearNum));
     },
     enabled: !!actor && !isFetching && !!make && !!model && !!year,
@@ -197,11 +208,11 @@ export function useUpdateBatteryInventory() {
 
   return useMutation({
     mutationFn: async (battery: Battery) => {
-      if (!actor) throw new Error('Actor not available');
+      if (!actor) throw new Error("Actor not available");
       return actor.updateBatteryInventory(battery);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['batteries'] });
+      queryClient.invalidateQueries({ queryKey: ["batteries"] });
     },
   });
 }
@@ -212,11 +223,11 @@ export function useDeleteBatteryInventory() {
 
   return useMutation({
     mutationFn: async (batteryId: string) => {
-      if (!actor) throw new Error('Actor not available');
+      if (!actor) throw new Error("Actor not available");
       return actor.deleteBatteryInventory(batteryId);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['batteries'] });
+      queryClient.invalidateQueries({ queryKey: ["batteries"] });
     },
   });
 }
@@ -226,10 +237,10 @@ export function useGetAllBatteryPrices() {
   const { actor, isFetching } = useActor();
 
   return useQuery<BatteryPrice[]>({
-    queryKey: ['batteryPrices'],
+    queryKey: ["batteryPrices"],
     queryFn: async () => {
       if (!actor) return [];
-      return actor.getAllBatteryPrices('');
+      return actor.getAllBatteryPrices("");
     },
     enabled: !!actor && !isFetching,
   });
@@ -241,11 +252,11 @@ export function useAddBatteryPrice() {
 
   return useMutation({
     mutationFn: async (price: BatteryPrice) => {
-      if (!actor) throw new Error('Actor not available');
+      if (!actor) throw new Error("Actor not available");
       return actor.addBatteryPrice(price);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['batteryPrices'] });
+      queryClient.invalidateQueries({ queryKey: ["batteryPrices"] });
     },
   });
 }
@@ -255,12 +266,15 @@ export function useUpdateBatteryPrice() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ index, price }: { index: bigint; price: BatteryPrice }) => {
-      if (!actor) throw new Error('Actor not available');
+    mutationFn: async ({
+      index,
+      price,
+    }: { index: bigint; price: BatteryPrice }) => {
+      if (!actor) throw new Error("Actor not available");
       return actor.updateBatteryPrice(index, price);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['batteryPrices'] });
+      queryClient.invalidateQueries({ queryKey: ["batteryPrices"] });
     },
   });
 }
@@ -271,11 +285,11 @@ export function useDeleteBatteryPrice() {
 
   return useMutation({
     mutationFn: async (index: bigint) => {
-      if (!actor) throw new Error('Actor not available');
+      if (!actor) throw new Error("Actor not available");
       return actor.deleteBatteryPrice(index);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['batteryPrices'] });
+      queryClient.invalidateQueries({ queryKey: ["batteryPrices"] });
     },
   });
 }
@@ -285,9 +299,9 @@ export function useGetTechnicianAvailability() {
   const { actor, isFetching } = useActor();
 
   return useQuery({
-    queryKey: ['technicians'],
+    queryKey: ["technicians"],
     queryFn: async () => {
-      if (!actor) throw new Error('Actor not available');
+      if (!actor) throw new Error("Actor not available");
       return actor.getTechnicianAvailability();
     },
     enabled: !!actor && !isFetching,
@@ -300,11 +314,11 @@ export function useCreateTechnician() {
 
   return useMutation({
     mutationFn: async (profile: TechnicianProfile) => {
-      if (!actor) throw new Error('Actor not available');
+      if (!actor) throw new Error("Actor not available");
       return actor.createTechnician(profile);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['technicians'] });
+      queryClient.invalidateQueries({ queryKey: ["technicians"] });
     },
   });
 }
@@ -315,11 +329,11 @@ export function useUpdateTechnician() {
 
   return useMutation({
     mutationFn: async (profile: TechnicianProfile) => {
-      if (!actor) throw new Error('Actor not available');
+      if (!actor) throw new Error("Actor not available");
       return actor.updateTechnician(profile);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['technicians'] });
+      queryClient.invalidateQueries({ queryKey: ["technicians"] });
     },
   });
 }
@@ -329,9 +343,9 @@ export function useGetAllWarranties() {
   const { actor, isFetching } = useActor();
 
   return useQuery({
-    queryKey: ['warranties'],
+    queryKey: ["warranties"],
     queryFn: async () => {
-      if (!actor) throw new Error('Actor not available');
+      if (!actor) throw new Error("Actor not available");
       return actor.getAllWarranties();
     },
     enabled: !!actor && !isFetching,
@@ -344,11 +358,11 @@ export function useCreateWarranty() {
 
   return useMutation({
     mutationFn: async (input: WarrantyInput) => {
-      if (!actor) throw new Error('Actor not available');
+      if (!actor) throw new Error("Actor not available");
       return actor.createWarranty(input);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['warranties'] });
+      queryClient.invalidateQueries({ queryKey: ["warranties"] });
     },
   });
 }
@@ -358,9 +372,9 @@ export function useGetAllFleetAccounts() {
   const { actor, isFetching } = useActor();
 
   return useQuery({
-    queryKey: ['fleets'],
+    queryKey: ["fleets"],
     queryFn: async () => {
-      if (!actor) throw new Error('Actor not available');
+      if (!actor) throw new Error("Actor not available");
       return actor.getAllFleetAccounts();
     },
     enabled: !!actor && !isFetching,
@@ -372,7 +386,7 @@ export function useGetServiceAreas() {
   const { actor, isFetching } = useActor();
 
   return useQuery({
-    queryKey: ['serviceAreas'],
+    queryKey: ["serviceAreas"],
     queryFn: async () => {
       if (!actor) return [];
       return actor.getServiceAreas();
@@ -386,11 +400,47 @@ export function useGetStoreLocations() {
   const { actor, isFetching } = useActor();
 
   return useQuery({
-    queryKey: ['storeLocations'],
+    queryKey: ["storeLocations"],
     queryFn: async () => {
       if (!actor) return [];
       return actor.getStoreLocations();
     },
     enabled: !!actor && !isFetching,
+  });
+}
+
+// Bank Account Details
+export function useGetReceiverBankAccountDetails() {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<BankAccountDetails | null>({
+    queryKey: ["receiverBankAccountDetails"],
+    queryFn: async () => {
+      if (!actor) return null;
+      try {
+        return await actor.getReceiverBankAccountDetails();
+      } catch (error) {
+        console.error("Error fetching bank account details:", error);
+        return null;
+      }
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+export function useUpdateReceiverBankAccountDetails() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (details: BankAccountDetails) => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.updateReceiverBankAccountDetails(details);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["receiverBankAccountDetails"],
+      });
+    },
   });
 }

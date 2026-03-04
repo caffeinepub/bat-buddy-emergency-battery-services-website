@@ -10,6 +10,13 @@ import type { ActorMethod } from '@icp-sdk/core/agent';
 import type { IDL } from '@icp-sdk/core/candid';
 import type { Principal } from '@icp-sdk/core/principal';
 
+export interface BankAccountDetails {
+  'swiftBic' : string,
+  'iban' : string,
+  'accountHolderName' : string,
+  'bankName' : string,
+  'accountNumber' : string,
+}
 export interface Battery {
   'id' : string,
   'model' : string,
@@ -238,6 +245,8 @@ export interface _SERVICE {
   >,
   'getFleetAccount' : ActorMethod<[string], [] | [FleetAccount]>,
   'getMyBookings' : ActorMethod<[], Array<Booking>>,
+  'getReceiverBankAccountDetails' : ActorMethod<[], BankAccountDetails>,
+  'getReceiverIban' : ActorMethod<[], string>,
   'getServiceAreas' : ActorMethod<[], Array<string>>,
   'getStoreLocations' : ActorMethod<[], Array<StoreLocation>>,
   'getStripeSessionStatus' : ActorMethod<[string], StripeSessionStatus>,
@@ -256,6 +265,10 @@ export interface _SERVICE {
   'updateBatteryInventory' : ActorMethod<[Battery], undefined>,
   'updateBatteryPrice' : ActorMethod<[bigint, BatteryPrice], undefined>,
   'updateBookingStatus' : ActorMethod<[string, BookingStatus], undefined>,
+  'updateReceiverBankAccountDetails' : ActorMethod<
+    [BankAccountDetails],
+    undefined
+  >,
   'updateTechnician' : ActorMethod<[TechnicianProfile], undefined>,
   'updateTechnicianLocation' : ActorMethod<[string, Location], undefined>,
 }

@@ -1,44 +1,73 @@
-import { useState } from 'react';
-import { useNavigate } from '@tanstack/react-router';
-import Header from '../components/Header';
-import Footer from '../components/Footer';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { toast } from 'sonner';
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
-  useGetAllBookings,
-  useGetAvailableBatteries,
-  useGetTechnicianAvailability,
-  useGetAllWarranties,
-  useGetAllFleetAccounts,
-  useAssignTechnician,
-  useUpdateBookingStatus,
-  useUpdateBatteryInventory,
-  useDeleteBatteryInventory,
-  useCreateTechnician,
-  useGetBookingStatusCounts,
-  useIsCallerAdmin,
-} from '../hooks/useQueries';
-import { BookingStatus, Battery, TechnicianProfile } from '../backend';
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
-  Package,
-  Users,
-  Wrench,
-  TrendingUp,
-  Plus,
-  Edit,
-  Trash2,
-  CheckCircle2,
-  Clock,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useNavigate } from "@tanstack/react-router";
+import {
   AlertCircle,
   BarChart3,
-} from 'lucide-react';
+  Building2,
+  Check,
+  CheckCircle2,
+  Clock,
+  Copy,
+  Edit,
+  Package,
+  Plus,
+  Save,
+  Trash2,
+  TrendingUp,
+  Users,
+  Wrench,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+import {
+  type BankAccountDetails,
+  type Battery,
+  BookingStatus,
+  type TechnicianProfile,
+} from "../backend";
+import Footer from "../components/Footer";
+import Header from "../components/Header";
+import {
+  useAssignTechnician,
+  useCreateTechnician,
+  useDeleteBatteryInventory,
+  useGetAllBookings,
+  useGetAllFleetAccounts,
+  useGetAllWarranties,
+  useGetAvailableBatteries,
+  useGetBookingStatusCounts,
+  useGetReceiverBankAccountDetails,
+  useGetTechnicianAvailability,
+  useIsCallerAdmin,
+  useUpdateBatteryInventory,
+  useUpdateBookingStatus,
+  useUpdateReceiverBankAccountDetails,
+} from "../hooks/useQueries";
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -49,42 +78,62 @@ export default function AdminDashboard() {
   const { data: warranties = [] } = useGetAllWarranties();
   const { data: fleets = [] } = useGetAllFleetAccounts();
   const { data: statusCounts = [] } = useGetBookingStatusCounts();
+  const { data: bankAccountDetails, isLoading: bankDetailsLoading } =
+    useGetReceiverBankAccountDetails();
 
   const assignTechnician = useAssignTechnician();
   const updateBookingStatus = useUpdateBookingStatus();
   const updateBattery = useUpdateBatteryInventory();
   const deleteBattery = useDeleteBatteryInventory();
   const createTechnician = useCreateTechnician();
+  const updateBankAccount = useUpdateReceiverBankAccountDetails();
 
   const [selectedBooking, setSelectedBooking] = useState<string | null>(null);
-  const [selectedTechnicianId, setSelectedTechnicianId] = useState('');
+  const [selectedTechnicianId, setSelectedTechnicianId] = useState("");
   const [batteryDialogOpen, setBatteryDialogOpen] = useState(false);
   const [technicianDialogOpen, setTechnicianDialogOpen] = useState(false);
+  const [copiedField, setCopiedField] = useState<string | null>(null);
 
   // Battery form state
   const [batteryForm, setBatteryForm] = useState({
-    id: '',
-    brand: '',
-    model: '',
-    capacity: '',
-    price: '',
-    warrantyMonths: '',
-    stock: '',
+    id: "",
+    brand: "",
+    model: "",
+    capacity: "",
+    price: "",
+    warrantyMonths: "",
+    stock: "",
   });
 
   // Technician form state
   const [technicianForm, setTechnicianForm] = useState({
-    id: '',
-    name: '',
-    phone: '',
+    id: "",
+    name: "",
+    phone: "",
     isActive: true,
   });
+
+  // Bank account form state
+  const [bankAccountForm, setBankAccountForm] = useState<BankAccountDetails>({
+    accountHolderName: "",
+    accountNumber: "",
+    iban: "",
+    swiftBic: "",
+    bankName: "",
+  });
+
+  // Initialize bank account form when data is loaded
+  useEffect(() => {
+    if (bankAccountDetails) {
+      setBankAccountForm(bankAccountDetails);
+    }
+  }, [bankAccountDetails]);
 
   if (adminCheckLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <div className="w-16 h-16 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
           <p className="text-muted-foreground">Loading dashboard...</p>
         </div>
       </div>
@@ -98,8 +147,10 @@ export default function AdminDashboard() {
         <div className="container mx-auto px-4 py-20 text-center">
           <AlertCircle className="h-16 w-16 text-destructive mx-auto mb-4" />
           <h1 className="text-3xl font-bold mb-4">Access Denied</h1>
-          <p className="text-muted-foreground mb-6">You don't have permission to access the admin dashboard.</p>
-          <Button onClick={() => navigate({ to: '/' })}>Go to Home</Button>
+          <p className="text-muted-foreground mb-6">
+            You don't have permission to access the admin dashboard.
+          </p>
+          <Button onClick={() => navigate({ to: "/" })}>Go to Home</Button>
         </div>
         <Footer />
       </div>
@@ -108,7 +159,7 @@ export default function AdminDashboard() {
 
   const handleAssignTechnician = async () => {
     if (!selectedBooking || !selectedTechnicianId) {
-      toast.error('Please select a technician');
+      toast.error("Please select a technician");
       return;
     }
 
@@ -117,28 +168,31 @@ export default function AdminDashboard() {
         bookingId: selectedBooking,
         technicianId: selectedTechnicianId,
       });
-      toast.success('Technician assigned successfully!');
+      toast.success("Technician assigned successfully!");
       setSelectedBooking(null);
-      setSelectedTechnicianId('');
+      setSelectedTechnicianId("");
     } catch (error) {
-      console.error('Assignment error:', error);
-      toast.error('Failed to assign technician');
+      console.error("Assignment error:", error);
+      toast.error("Failed to assign technician");
     }
   };
 
-  const handleStatusUpdate = async (bookingId: string, newStatus: BookingStatus) => {
+  const handleStatusUpdate = async (
+    bookingId: string,
+    newStatus: BookingStatus,
+  ) => {
     try {
       await updateBookingStatus.mutateAsync({ bookingId, newStatus });
-      toast.success('Booking status updated!');
+      toast.success("Booking status updated!");
     } catch (error) {
-      console.error('Status update error:', error);
-      toast.error('Failed to update status');
+      console.error("Status update error:", error);
+      toast.error("Failed to update status");
     }
   };
 
   const handleSaveBattery = async () => {
     if (!batteryForm.id || !batteryForm.brand || !batteryForm.model) {
-      toast.error('Please fill in all required fields');
+      toast.error("Please fill in all required fields");
       return;
     }
 
@@ -154,28 +208,36 @@ export default function AdminDashboard() {
       };
 
       await updateBattery.mutateAsync(battery);
-      toast.success('Battery saved successfully!');
+      toast.success("Battery saved successfully!");
       setBatteryDialogOpen(false);
-      setBatteryForm({ id: '', brand: '', model: '', capacity: '', price: '', warrantyMonths: '', stock: '' });
+      setBatteryForm({
+        id: "",
+        brand: "",
+        model: "",
+        capacity: "",
+        price: "",
+        warrantyMonths: "",
+        stock: "",
+      });
     } catch (error) {
-      console.error('Battery save error:', error);
-      toast.error('Failed to save battery');
+      console.error("Battery save error:", error);
+      toast.error("Failed to save battery");
     }
   };
 
   const handleDeleteBattery = async (batteryId: string) => {
     try {
       await deleteBattery.mutateAsync(batteryId);
-      toast.success('Battery deleted successfully!');
+      toast.success("Battery deleted successfully!");
     } catch (error) {
-      console.error('Battery delete error:', error);
-      toast.error('Failed to delete battery');
+      console.error("Battery delete error:", error);
+      toast.error("Failed to delete battery");
     }
   };
 
   const handleCreateTechnician = async () => {
     if (!technicianForm.id || !technicianForm.name || !technicianForm.phone) {
-      toast.error('Please fill in all required fields');
+      toast.error("Please fill in all required fields");
       return;
     }
 
@@ -190,399 +252,766 @@ export default function AdminDashboard() {
         location: {
           latitude: 25.2048,
           longitude: 55.2708,
-          address: 'Dubai',
-          city: 'Dubai',
-          emirate: 'Dubai',
+          address: "Dubai",
+          city: "Dubai",
+          emirate: "Dubai",
         },
       };
 
       await createTechnician.mutateAsync(technician);
-      toast.success('Technician created successfully!');
+      toast.success("Technician created successfully!");
       setTechnicianDialogOpen(false);
-      setTechnicianForm({ id: '', name: '', phone: '', isActive: true });
+      setTechnicianForm({ id: "", name: "", phone: "", isActive: true });
     } catch (error) {
-      console.error('Technician create error:', error);
-      toast.error('Failed to create technician');
+      console.error("Technician create error:", error);
+      toast.error("Failed to create technician");
+    }
+  };
+
+  const handleSaveBankAccount = async () => {
+    if (
+      !bankAccountForm.accountHolderName ||
+      !bankAccountForm.accountNumber ||
+      !bankAccountForm.bankName ||
+      !bankAccountForm.iban ||
+      !bankAccountForm.swiftBic
+    ) {
+      toast.error("Please fill in all required fields");
+      return;
+    }
+
+    try {
+      await updateBankAccount.mutateAsync(bankAccountForm);
+      toast.success("Bank account details saved successfully!");
+    } catch (error: any) {
+      console.error("Bank account save error:", error);
+      const errorMessage =
+        error?.message || "Failed to save bank account details";
+      toast.error(errorMessage);
+    }
+  };
+
+  const handleCopyToClipboard = async (text: string, fieldName: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedField(fieldName);
+      toast.success(`${fieldName} copied to clipboard`);
+      setTimeout(() => setCopiedField(null), 2000);
+    } catch (_error) {
+      toast.error("Failed to copy to clipboard");
     }
   };
 
   const getStatusBadge = (status: BookingStatus) => {
     const variants: Record<BookingStatus, string> = {
-      pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
-      confirmed: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
-      inProgress: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
-      completed: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
-      cancelled: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
+      pending:
+        "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200",
+      confirmed:
+        "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
+      inProgress:
+        "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200",
+      completed:
+        "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
+      cancelled: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
     };
 
     return <Badge className={variants[status]}>{status}</Badge>;
   };
 
-  const stats = [
-    {
-      title: 'Total Bookings',
-      value: bookings.length,
-      icon: Package,
-      color: 'text-blue-600',
-    },
-    {
-      title: 'Active Technicians',
-      value: technicians.filter((t) => t.isActive).length,
-      icon: Users,
-      color: 'text-green-600',
-    },
-    {
-      title: 'Battery Stock',
-      value: batteries.reduce((sum, b) => sum + Number(b.stock), 0),
-      icon: Wrench,
-      color: 'text-amber-600',
-    },
-    {
-      title: 'Fleet Accounts',
-      value: fleets.length,
-      icon: TrendingUp,
-      color: 'text-purple-600',
-    },
-  ];
+  const totalBookings = bookings.length;
+  const activeBookings = bookings.filter(
+    (b) => b.status === BookingStatus.inProgress,
+  ).length;
+  const totalRevenue =
+    bookings.filter((b) => b.status === BookingStatus.completed).length * 350;
 
   return (
     <div className="min-h-screen">
       <Header />
 
-      <section className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Admin Dashboard</h1>
-          <p className="text-muted-foreground">Manage bookings, inventory, technicians, and more</p>
+          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
+            Admin Dashboard
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400">
+            Manage your battery service operations
+          </p>
         </div>
 
-        {/* Stats Grid */}
+        {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {stats.map((stat, index) => (
-            <Card key={index}>
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground">{stat.title}</p>
-                    <p className="text-3xl font-bold mt-1">{stat.value}</p>
-                  </div>
-                  <stat.icon className={`h-10 w-10 ${stat.color}`} />
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium">
+                Total Bookings
+              </CardTitle>
+              <Package className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{totalBookings}</div>
+              <p className="text-xs text-muted-foreground">All time bookings</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium">Active Jobs</CardTitle>
+              <Clock className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{activeBookings}</div>
+              <p className="text-xs text-muted-foreground">
+                Currently in progress
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium">
+                Total Revenue
+              </CardTitle>
+              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">AED {totalRevenue}</div>
+              <p className="text-xs text-muted-foreground">
+                From completed jobs
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium">Technicians</CardTitle>
+              <Users className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{technicians.length}</div>
+              <p className="text-xs text-muted-foreground">
+                Active technicians
+              </p>
+            </CardContent>
+          </Card>
         </div>
 
-        {/* Analytics */}
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <BarChart3 className="h-5 w-5" />
-              Booking Status Overview
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-              {statusCounts.map(([status, count]) => (
-                <div key={status} className="text-center">
-                  <p className="text-2xl font-bold">{Number(count)}</p>
-                  <p className="text-sm text-muted-foreground capitalize">{status}</p>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Tabs defaultValue="bookings" className="w-full">
-          <TabsList className="grid w-full grid-cols-5">
+        {/* Main Content Tabs */}
+        <Tabs defaultValue="bookings" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-6">
             <TabsTrigger value="bookings">Bookings</TabsTrigger>
             <TabsTrigger value="inventory">Inventory</TabsTrigger>
             <TabsTrigger value="technicians">Technicians</TabsTrigger>
             <TabsTrigger value="warranties">Warranties</TabsTrigger>
-            <TabsTrigger value="fleets">Fleets</TabsTrigger>
+            <TabsTrigger value="fleets">Fleet Accounts</TabsTrigger>
+            <TabsTrigger value="bank">Bank Account</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="bookings">
+          {/* Bookings Tab */}
+          <TabsContent value="bookings" className="space-y-4">
             <Card>
               <CardHeader>
                 <CardTitle>Booking Management</CardTitle>
-                <CardDescription>View and manage all service bookings</CardDescription>
+                <CardDescription>
+                  View and manage all service bookings
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {bookings.map((booking) => (
-                    <Card key={booking.id}>
-                      <CardContent className="pt-6">
-                        <div className="flex items-start justify-between">
-                          <div className="space-y-2">
-                            <div className="flex items-center gap-2">
-                              <h3 className="font-semibold">{booking.id}</h3>
-                              {getStatusBadge(booking.status)}
-                            </div>
-                            <p className="text-sm text-muted-foreground">Customer: {booking.customerId}</p>
-                            <p className="text-sm text-muted-foreground">
-                              Location: {booking.location.city}, {booking.location.emirate}
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              Service: {booking.serviceType.replace(/([A-Z])/g, ' $1').trim()}
-                            </p>
-                            {booking.technicianId && (
-                              <p className="text-sm text-muted-foreground">Technician: {booking.technicianId}</p>
-                            )}
+                  {bookings.length === 0 ? (
+                    <p className="text-center text-muted-foreground py-8">
+                      No bookings found
+                    </p>
+                  ) : (
+                    bookings.map((booking) => (
+                      <div
+                        key={booking.id}
+                        className="flex flex-col md:flex-row md:items-center justify-between p-4 border rounded-lg gap-4"
+                      >
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="font-semibold">{booking.id}</span>
+                            {getStatusBadge(booking.status)}
                           </div>
-                          <div className="flex flex-col gap-2">
-                            {!booking.technicianId && booking.status === 'pending' && (
-                              <Button
-                                size="sm"
-                                onClick={() => setSelectedBooking(booking.id)}
-                                className="bg-gradient-to-r from-amber-500 to-orange-500"
-                              >
-                                Assign Technician
-                              </Button>
-                            )}
-                            {booking.status !== 'completed' && booking.status !== 'cancelled' && (
-                              <Select
-                                value={booking.status}
-                                onValueChange={(value) => handleStatusUpdate(booking.id, value as BookingStatus)}
-                              >
-                                <SelectTrigger className="w-40">
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="pending">Pending</SelectItem>
-                                  <SelectItem value="confirmed">Confirmed</SelectItem>
-                                  <SelectItem value="inProgress">In Progress</SelectItem>
-                                  <SelectItem value="completed">Completed</SelectItem>
-                                  <SelectItem value="cancelled">Cancelled</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            )}
-                          </div>
+                          <p className="text-sm text-muted-foreground">
+                            Customer: {booking.customerId} | Location:{" "}
+                            {booking.location.city}
+                          </p>
+                          {booking.technicianId && (
+                            <p className="text-sm text-muted-foreground">
+                              Technician: {booking.technicianId}
+                            </p>
+                          )}
                         </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="inventory">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle>Battery Inventory</CardTitle>
-                    <CardDescription>Manage battery stock and pricing</CardDescription>
-                  </div>
-                  <Button
-                    onClick={() => setBatteryDialogOpen(true)}
-                    className="bg-gradient-to-r from-amber-500 to-orange-500"
-                  >
-                    <Plus className="mr-2 h-4 w-4" />
-                    Add Battery
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {batteries.map((battery) => (
-                    <Card key={battery.id}>
-                      <CardContent className="pt-6">
-                        <div className="flex items-center justify-between">
-                          <div className="flex gap-4">
-                            <img
-                              src="/assets/generated/car-battery-product.dim_400x400.jpg"
-                              alt={`${battery.brand} ${battery.model}`}
-                              className="w-16 h-16 object-cover rounded"
-                            />
-                            <div>
-                              <h3 className="font-semibold">
-                                {battery.brand} {battery.model}
-                              </h3>
-                              <p className="text-sm text-muted-foreground">Capacity: {Number(battery.capacity)}Ah</p>
-                              <p className="text-sm text-muted-foreground">
-                                Warranty: {Number(battery.warrantyMonths)} months
-                              </p>
-                              <p className="text-sm text-muted-foreground">Stock: {Number(battery.stock)} units</p>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <p className="text-xl font-bold text-amber-600">AED {Number(battery.price)}</p>
+                        <div className="flex gap-2">
+                          {!booking.technicianId && (
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={() => {
-                                setBatteryForm({
-                                  id: battery.id,
-                                  brand: battery.brand,
-                                  model: battery.model,
-                                  capacity: battery.capacity.toString(),
-                                  price: battery.price.toString(),
-                                  warrantyMonths: battery.warrantyMonths.toString(),
-                                  stock: battery.stock.toString(),
-                                });
-                                setBatteryDialogOpen(true);
-                              }}
+                              onClick={() => setSelectedBooking(booking.id)}
                             >
-                              <Edit className="h-4 w-4" />
+                              Assign Tech
                             </Button>
-                            <Button
-                              size="sm"
-                              variant="destructive"
-                              onClick={() => handleDeleteBattery(battery.id)}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
+                          )}
+                          <Select
+                            value={booking.status}
+                            onValueChange={(value) =>
+                              handleStatusUpdate(
+                                booking.id,
+                                value as BookingStatus,
+                              )
+                            }
+                          >
+                            <SelectTrigger className="w-[140px]">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value={BookingStatus.pending}>
+                                Pending
+                              </SelectItem>
+                              <SelectItem value={BookingStatus.confirmed}>
+                                Confirmed
+                              </SelectItem>
+                              <SelectItem value={BookingStatus.inProgress}>
+                                In Progress
+                              </SelectItem>
+                              <SelectItem value={BookingStatus.completed}>
+                                Completed
+                              </SelectItem>
+                              <SelectItem value={BookingStatus.cancelled}>
+                                Cancelled
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
                         </div>
-                      </CardContent>
-                    </Card>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Analytics Card */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <BarChart3 className="h-5 w-5" />
+                  Booking Analytics
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                  {statusCounts.map(([status, count]) => (
+                    <div
+                      key={status}
+                      className="text-center p-4 border rounded-lg"
+                    >
+                      <div className="text-2xl font-bold">{Number(count)}</div>
+                      <div className="text-sm text-muted-foreground capitalize">
+                        {status}
+                      </div>
+                    </div>
                   ))}
                 </div>
               </CardContent>
             </Card>
           </TabsContent>
 
-          <TabsContent value="technicians">
+          {/* Inventory Tab */}
+          <TabsContent value="inventory" className="space-y-4">
             <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle>Technician Management</CardTitle>
-                    <CardDescription>Manage technician profiles and availability</CardDescription>
-                  </div>
-                  <Button
-                    onClick={() => setTechnicianDialogOpen(true)}
-                    className="bg-gradient-to-r from-amber-500 to-orange-500"
-                  >
-                    <Plus className="mr-2 h-4 w-4" />
-                    Add Technician
-                  </Button>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle>Battery Inventory</CardTitle>
+                  <CardDescription>
+                    Manage battery stock and pricing
+                  </CardDescription>
                 </div>
+                <Button onClick={() => setBatteryDialogOpen(true)}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Battery
+                </Button>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {technicians.map((tech) => (
-                    <Card key={tech.id}>
-                      <CardContent className="pt-6">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <h3 className="font-semibold">{tech.name}</h3>
-                              <Badge variant={tech.isActive ? 'default' : 'secondary'}>
-                                {tech.isActive ? 'Active' : 'Inactive'}
-                              </Badge>
-                            </div>
-                            <p className="text-sm text-muted-foreground">ID: {tech.id}</p>
-                            <p className="text-sm text-muted-foreground">Phone: {tech.phone}</p>
-                            <p className="text-sm text-muted-foreground">
-                              Completed Jobs: {Number(tech.completedJobs)}
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              Assigned Jobs: {tech.assignedJobs.length}
-                            </p>
-                          </div>
+                  {batteries.length === 0 ? (
+                    <p className="text-center text-muted-foreground py-8">
+                      No batteries in inventory
+                    </p>
+                  ) : (
+                    batteries.map((battery) => (
+                      <div
+                        key={battery.id}
+                        className="flex flex-col md:flex-row md:items-center justify-between p-4 border rounded-lg gap-4"
+                      >
+                        <div className="flex-1">
+                          <h3 className="font-semibold">
+                            {battery.brand} {battery.model}
+                          </h3>
+                          <p className="text-sm text-muted-foreground">
+                            Capacity: {Number(battery.capacity)}Ah | Price: AED{" "}
+                            {Number(battery.price)} | Stock:{" "}
+                            {Number(battery.stock)}
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            Warranty: {Number(battery.warrantyMonths)} months
+                          </p>
                         </div>
-                      </CardContent>
-                    </Card>
-                  ))}
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              setBatteryForm({
+                                id: battery.id,
+                                brand: battery.brand,
+                                model: battery.model,
+                                capacity: battery.capacity.toString(),
+                                price: battery.price.toString(),
+                                warrantyMonths:
+                                  battery.warrantyMonths.toString(),
+                                stock: battery.stock.toString(),
+                              });
+                              setBatteryDialogOpen(true);
+                            }}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => handleDeleteBattery(battery.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))
+                  )}
                 </div>
               </CardContent>
             </Card>
           </TabsContent>
 
-          <TabsContent value="warranties">
+          {/* Technicians Tab */}
+          <TabsContent value="technicians" className="space-y-4">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle>Technician Management</CardTitle>
+                  <CardDescription>
+                    Manage your service technicians
+                  </CardDescription>
+                </div>
+                <Button onClick={() => setTechnicianDialogOpen(true)}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Technician
+                </Button>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {technicians.length === 0 ? (
+                    <p className="text-center text-muted-foreground py-8">
+                      No technicians found
+                    </p>
+                  ) : (
+                    technicians.map((tech) => (
+                      <div
+                        key={tech.id}
+                        className="flex flex-col md:flex-row md:items-center justify-between p-4 border rounded-lg gap-4"
+                      >
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            <h3 className="font-semibold">{tech.name}</h3>
+                            <Badge
+                              variant={tech.isActive ? "default" : "secondary"}
+                            >
+                              {tech.isActive ? "Active" : "Inactive"}
+                            </Badge>
+                          </div>
+                          <p className="text-sm text-muted-foreground">
+                            ID: {tech.id} | Phone: {tech.phone}
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            Assigned Jobs: {tech.assignedJobs.length} |
+                            Completed: {Number(tech.completedJobs)}
+                          </p>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Warranties Tab */}
+          <TabsContent value="warranties" className="space-y-4">
             <Card>
               <CardHeader>
                 <CardTitle>Warranty Management</CardTitle>
-                <CardDescription>Track and manage battery warranties</CardDescription>
+                <CardDescription>
+                  Track and manage battery warranties
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {warranties.map((warranty) => (
-                    <Card key={warranty.id}>
-                      <CardContent className="pt-6">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <h3 className="font-semibold">{warranty.id}</h3>
-                            <p className="text-sm text-muted-foreground">Battery: {warranty.batteryId}</p>
-                            <p className="text-sm text-muted-foreground">Customer: {warranty.customerId}</p>
-                            <p className="text-sm text-muted-foreground">
-                              Duration: {Number(warranty.warrantyMonths)} months
-                            </p>
-                          </div>
-                          <Badge variant={warranty.isActive ? 'default' : 'secondary'}>
-                            {warranty.isActive ? 'Active' : 'Expired'}
+                  {warranties.length === 0 ? (
+                    <p className="text-center text-muted-foreground py-8">
+                      No warranties found
+                    </p>
+                  ) : (
+                    warranties.map((warranty) => (
+                      <div key={warranty.id} className="p-4 border rounded-lg">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="font-semibold">{warranty.id}</span>
+                          <Badge
+                            variant={
+                              warranty.isActive ? "default" : "secondary"
+                            }
+                          >
+                            {warranty.isActive ? "Active" : "Expired"}
                           </Badge>
                         </div>
-                      </CardContent>
-                    </Card>
-                  ))}
+                        <p className="text-sm text-muted-foreground">
+                          Battery: {warranty.batteryId} | Customer:{" "}
+                          {warranty.customerId}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          Duration: {Number(warranty.warrantyMonths)} months
+                        </p>
+                      </div>
+                    ))
+                  )}
                 </div>
               </CardContent>
             </Card>
           </TabsContent>
 
-          <TabsContent value="fleets">
+          {/* Fleet Accounts Tab */}
+          <TabsContent value="fleets" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>Fleet Management</CardTitle>
-                <CardDescription>Manage corporate fleet accounts</CardDescription>
+                <CardTitle className="flex items-center gap-2">
+                  <Building2 className="h-5 w-5" />
+                  Fleet Account Management
+                </CardTitle>
+                <CardDescription>
+                  Manage corporate and fleet accounts
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {fleets.map((fleet) => (
-                    <Card key={fleet.id}>
-                      <CardContent className="pt-6">
-                        <div>
-                          <h3 className="font-semibold">{fleet.companyName}</h3>
-                          <p className="text-sm text-muted-foreground">Contact: {fleet.contactName}</p>
-                          <p className="text-sm text-muted-foreground">Phone: {fleet.phone}</p>
-                          <p className="text-sm text-muted-foreground">Email: {fleet.email}</p>
-                          <p className="text-sm text-muted-foreground">Vehicles: {fleet.vehicles.length}</p>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
+                  {fleets.length === 0 ? (
+                    <p className="text-center text-muted-foreground py-8">
+                      No fleet accounts found
+                    </p>
+                  ) : (
+                    fleets.map((fleet) => (
+                      <div key={fleet.id} className="p-4 border rounded-lg">
+                        <h3 className="font-semibold mb-2">
+                          {fleet.companyName}
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                          Contact: {fleet.contactName} | Phone: {fleet.phone}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          Email: {fleet.email}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          Vehicles: {fleet.vehicles.length}
+                        </p>
+                      </div>
+                    ))
+                  )}
                 </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Bank Account Tab */}
+          <TabsContent value="bank" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Building2 className="h-5 w-5" />
+                  Receiver Bank Account Configuration
+                </CardTitle>
+                <CardDescription>
+                  Configure the bank account details that will be displayed to
+                  customers for bank transfer payments
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {bankDetailsLoading ? (
+                  <div className="text-center py-8">
+                    <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+                    <p className="text-muted-foreground">
+                      Loading bank account details...
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="bankName">Bank Name *</Label>
+                        <Input
+                          id="bankName"
+                          placeholder="e.g., Emirates NBD"
+                          value={bankAccountForm.bankName}
+                          onChange={(e) =>
+                            setBankAccountForm({
+                              ...bankAccountForm,
+                              bankName: e.target.value,
+                            })
+                          }
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="accountHolderName">
+                          Account Holder Name *
+                        </Label>
+                        <Input
+                          id="accountHolderName"
+                          placeholder="e.g., BAT-BUDDY LLC"
+                          value={bankAccountForm.accountHolderName}
+                          onChange={(e) =>
+                            setBankAccountForm({
+                              ...bankAccountForm,
+                              accountHolderName: e.target.value,
+                            })
+                          }
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="accountNumber">Account Number *</Label>
+                        <Input
+                          id="accountNumber"
+                          placeholder="e.g., 1234567890"
+                          value={bankAccountForm.accountNumber}
+                          onChange={(e) =>
+                            setBankAccountForm({
+                              ...bankAccountForm,
+                              accountNumber: e.target.value,
+                            })
+                          }
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="iban">IBAN *</Label>
+                        <Input
+                          id="iban"
+                          placeholder="e.g., AE070331234567890123456"
+                          value={bankAccountForm.iban}
+                          onChange={(e) =>
+                            setBankAccountForm({
+                              ...bankAccountForm,
+                              iban: e.target.value.toUpperCase(),
+                            })
+                          }
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="swiftBic">SWIFT/BIC Code *</Label>
+                        <Input
+                          id="swiftBic"
+                          placeholder="e.g., EBILAEAD"
+                          value={bankAccountForm.swiftBic}
+                          onChange={(e) =>
+                            setBankAccountForm({
+                              ...bankAccountForm,
+                              swiftBic: e.target.value.toUpperCase(),
+                            })
+                          }
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex gap-3">
+                      <Button
+                        onClick={handleSaveBankAccount}
+                        disabled={updateBankAccount.isPending}
+                        className="flex-1"
+                      >
+                        {updateBankAccount.isPending ? (
+                          <>
+                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                            Saving...
+                          </>
+                        ) : (
+                          <>
+                            <Save className="mr-2 h-4 w-4" />
+                            Save Bank Account Details
+                          </>
+                        )}
+                      </Button>
+                    </div>
+
+                    {bankAccountDetails && (
+                      <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg">
+                        <p className="text-sm text-blue-900 dark:text-blue-100 mb-3">
+                          <strong>Preview:</strong> This is how customers will
+                          see your bank account details when they select bank
+                          transfer as payment method.
+                        </p>
+                        <div className="space-y-2 bg-white dark:bg-gray-900 p-3 rounded border">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <div className="text-xs text-muted-foreground">
+                                Bank Name
+                              </div>
+                              <div className="font-semibold">
+                                {bankAccountDetails.bankName}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <div className="text-xs text-muted-foreground">
+                                Account Holder
+                              </div>
+                              <div className="font-semibold">
+                                {bankAccountDetails.accountHolderName}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <div className="flex-1">
+                              <div className="text-xs text-muted-foreground">
+                                Account Number
+                              </div>
+                              <div className="font-mono font-semibold">
+                                {bankAccountDetails.accountNumber}
+                              </div>
+                            </div>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() =>
+                                handleCopyToClipboard(
+                                  bankAccountDetails.accountNumber,
+                                  "Account Number",
+                                )
+                              }
+                            >
+                              {copiedField === "Account Number" ? (
+                                <Check className="h-4 w-4 text-green-600" />
+                              ) : (
+                                <Copy className="h-4 w-4" />
+                              )}
+                            </Button>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <div className="flex-1">
+                              <div className="text-xs text-muted-foreground">
+                                IBAN
+                              </div>
+                              <div className="font-mono font-semibold uppercase break-all">
+                                {bankAccountDetails.iban}
+                              </div>
+                            </div>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() =>
+                                handleCopyToClipboard(
+                                  bankAccountDetails.iban,
+                                  "IBAN",
+                                )
+                              }
+                            >
+                              {copiedField === "IBAN" ? (
+                                <Check className="h-4 w-4 text-green-600" />
+                              ) : (
+                                <Copy className="h-4 w-4" />
+                              )}
+                            </Button>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <div className="flex-1">
+                              <div className="text-xs text-muted-foreground">
+                                SWIFT/BIC Code
+                              </div>
+                              <div className="font-mono font-semibold uppercase">
+                                {bankAccountDetails.swiftBic}
+                              </div>
+                            </div>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() =>
+                                handleCopyToClipboard(
+                                  bankAccountDetails.swiftBic,
+                                  "SWIFT/BIC",
+                                )
+                              }
+                            >
+                              {copiedField === "SWIFT/BIC" ? (
+                                <Check className="h-4 w-4 text-green-600" />
+                              ) : (
+                                <Copy className="h-4 w-4" />
+                              )}
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
         </Tabs>
-      </section>
+      </main>
+
+      <Footer />
 
       {/* Assign Technician Dialog */}
-      <Dialog open={!!selectedBooking} onOpenChange={() => setSelectedBooking(null)}>
+      <Dialog
+        open={!!selectedBooking}
+        onOpenChange={() => setSelectedBooking(null)}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Assign Technician</DialogTitle>
-            <DialogDescription>Select a technician for booking {selectedBooking}</DialogDescription>
+            <DialogDescription>
+              Select a technician for booking {selectedBooking}
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
-            <div>
-              <Label>Select Technician</Label>
-              <Select value={selectedTechnicianId} onValueChange={setSelectedTechnicianId}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Choose a technician" />
-                </SelectTrigger>
-                <SelectContent>
-                  {technicians
-                    .filter((t) => t.isActive)
-                    .map((tech) => (
-                      <SelectItem key={tech.id} value={tech.id}>
-                        {tech.name} - {tech.assignedJobs.length} active jobs
-                      </SelectItem>
-                    ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <Button
-              onClick={handleAssignTechnician}
-              className="w-full bg-gradient-to-r from-amber-500 to-orange-500"
-              disabled={assignTechnician.isPending}
+            <Select
+              value={selectedTechnicianId}
+              onValueChange={setSelectedTechnicianId}
             >
-              {assignTechnician.isPending ? 'Assigning...' : 'Assign Technician'}
-            </Button>
+              <SelectTrigger>
+                <SelectValue placeholder="Select technician" />
+              </SelectTrigger>
+              <SelectContent>
+                {technicians.map((tech) => (
+                  <SelectItem key={tech.id} value={tech.id}>
+                    {tech.name} ({tech.id})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <div className="flex gap-2">
+              <Button
+                onClick={handleAssignTechnician}
+                disabled={!selectedTechnicianId}
+              >
+                Assign
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setSelectedBooking(null)}
+              >
+                Cancel
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
@@ -591,129 +1020,162 @@ export default function AdminDashboard() {
       <Dialog open={batteryDialogOpen} onOpenChange={setBatteryDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{batteryForm.id ? 'Edit Battery' : 'Add Battery'}</DialogTitle>
+            <DialogTitle>
+              {batteryForm.id ? "Edit Battery" : "Add Battery"}
+            </DialogTitle>
             <DialogDescription>Enter battery details</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
-            <div>
-              <Label>Battery ID</Label>
+            <div className="space-y-2">
+              <Label htmlFor="battery-id">Battery ID *</Label>
               <Input
+                id="battery-id"
                 value={batteryForm.id}
-                onChange={(e) => setBatteryForm({ ...batteryForm, id: e.target.value })}
-                placeholder="BAT-001"
+                onChange={(e) =>
+                  setBatteryForm({ ...batteryForm, id: e.target.value })
+                }
               />
             </div>
-            <div>
-              <Label>Brand</Label>
+            <div className="space-y-2">
+              <Label htmlFor="battery-brand">Brand *</Label>
               <Input
+                id="battery-brand"
                 value={batteryForm.brand}
-                onChange={(e) => setBatteryForm({ ...batteryForm, brand: e.target.value })}
-                placeholder="e.g., Bosch"
+                onChange={(e) =>
+                  setBatteryForm({ ...batteryForm, brand: e.target.value })
+                }
               />
             </div>
-            <div>
-              <Label>Model</Label>
+            <div className="space-y-2">
+              <Label htmlFor="battery-model">Model *</Label>
               <Input
+                id="battery-model"
                 value={batteryForm.model}
-                onChange={(e) => setBatteryForm({ ...batteryForm, model: e.target.value })}
-                placeholder="e.g., S4 005"
+                onChange={(e) =>
+                  setBatteryForm({ ...batteryForm, model: e.target.value })
+                }
               />
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label>Capacity (Ah)</Label>
+              <div className="space-y-2">
+                <Label htmlFor="battery-capacity">Capacity (Ah)</Label>
                 <Input
+                  id="battery-capacity"
                   type="number"
                   value={batteryForm.capacity}
-                  onChange={(e) => setBatteryForm({ ...batteryForm, capacity: e.target.value })}
-                  placeholder="60"
+                  onChange={(e) =>
+                    setBatteryForm({ ...batteryForm, capacity: e.target.value })
+                  }
                 />
               </div>
-              <div>
-                <Label>Price (AED)</Label>
+              <div className="space-y-2">
+                <Label htmlFor="battery-price">Price (AED)</Label>
                 <Input
+                  id="battery-price"
                   type="number"
                   value={batteryForm.price}
-                  onChange={(e) => setBatteryForm({ ...batteryForm, price: e.target.value })}
-                  placeholder="450"
+                  onChange={(e) =>
+                    setBatteryForm({ ...batteryForm, price: e.target.value })
+                  }
                 />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label>Warranty (months)</Label>
+              <div className="space-y-2">
+                <Label htmlFor="battery-warranty">Warranty (months)</Label>
                 <Input
+                  id="battery-warranty"
                   type="number"
                   value={batteryForm.warrantyMonths}
-                  onChange={(e) => setBatteryForm({ ...batteryForm, warrantyMonths: e.target.value })}
-                  placeholder="24"
+                  onChange={(e) =>
+                    setBatteryForm({
+                      ...batteryForm,
+                      warrantyMonths: e.target.value,
+                    })
+                  }
                 />
               </div>
-              <div>
-                <Label>Stock</Label>
+              <div className="space-y-2">
+                <Label htmlFor="battery-stock">Stock</Label>
                 <Input
+                  id="battery-stock"
                   type="number"
                   value={batteryForm.stock}
-                  onChange={(e) => setBatteryForm({ ...batteryForm, stock: e.target.value })}
-                  placeholder="10"
+                  onChange={(e) =>
+                    setBatteryForm({ ...batteryForm, stock: e.target.value })
+                  }
                 />
               </div>
             </div>
-            <Button
-              onClick={handleSaveBattery}
-              className="w-full bg-gradient-to-r from-amber-500 to-orange-500"
-              disabled={updateBattery.isPending}
-            >
-              {updateBattery.isPending ? 'Saving...' : 'Save Battery'}
-            </Button>
+            <div className="flex gap-2">
+              <Button onClick={handleSaveBattery}>Save</Button>
+              <Button
+                variant="outline"
+                onClick={() => setBatteryDialogOpen(false)}
+              >
+                Cancel
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
 
       {/* Technician Dialog */}
-      <Dialog open={technicianDialogOpen} onOpenChange={setTechnicianDialogOpen}>
+      <Dialog
+        open={technicianDialogOpen}
+        onOpenChange={setTechnicianDialogOpen}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Add Technician</DialogTitle>
             <DialogDescription>Enter technician details</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
-            <div>
-              <Label>Technician ID</Label>
+            <div className="space-y-2">
+              <Label htmlFor="tech-id">Technician ID *</Label>
               <Input
+                id="tech-id"
                 value={technicianForm.id}
-                onChange={(e) => setTechnicianForm({ ...technicianForm, id: e.target.value })}
-                placeholder="TECH-001"
+                onChange={(e) =>
+                  setTechnicianForm({ ...technicianForm, id: e.target.value })
+                }
               />
             </div>
-            <div>
-              <Label>Name</Label>
+            <div className="space-y-2">
+              <Label htmlFor="tech-name">Name *</Label>
               <Input
+                id="tech-name"
                 value={technicianForm.name}
-                onChange={(e) => setTechnicianForm({ ...technicianForm, name: e.target.value })}
-                placeholder="John Doe"
+                onChange={(e) =>
+                  setTechnicianForm({ ...technicianForm, name: e.target.value })
+                }
               />
             </div>
-            <div>
-              <Label>Phone</Label>
+            <div className="space-y-2">
+              <Label htmlFor="tech-phone">Phone *</Label>
               <Input
+                id="tech-phone"
                 value={technicianForm.phone}
-                onChange={(e) => setTechnicianForm({ ...technicianForm, phone: e.target.value })}
-                placeholder="+971 50 123 4567"
+                onChange={(e) =>
+                  setTechnicianForm({
+                    ...technicianForm,
+                    phone: e.target.value,
+                  })
+                }
               />
             </div>
-            <Button
-              onClick={handleCreateTechnician}
-              className="w-full bg-gradient-to-r from-amber-500 to-orange-500"
-              disabled={createTechnician.isPending}
-            >
-              {createTechnician.isPending ? 'Creating...' : 'Create Technician'}
-            </Button>
+            <div className="flex gap-2">
+              <Button onClick={handleCreateTechnician}>Create</Button>
+              <Button
+                variant="outline"
+                onClick={() => setTechnicianDialogOpen(false)}
+              >
+                Cancel
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
-
-      <Footer />
     </div>
   );
 }

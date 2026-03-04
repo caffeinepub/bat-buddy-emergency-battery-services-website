@@ -141,7 +141,14 @@ actor {
     premiumDiscount : Float;
   };
 
-  // State variables
+  public type BankAccountDetails = {
+    accountHolderName : Text;
+    accountNumber : Text;
+    iban : Text;
+    swiftBic : Text;
+    bankName : Text;
+  };
+
   let bookings = Map.empty<Text, Booking>();
   let inventory = Map.empty<Text, Battery>();
   let technicians = Map.empty<Text, TechnicianProfile>();
@@ -151,10 +158,10 @@ actor {
   let batteryPrices = List.empty<BatteryPrice>();
   let userProfiles = Map.empty<Principal, UserProfile>();
   let technicianPrincipals = Map.empty<Text, Principal>();
-
   var stripeConfig : ?Stripe.StripeConfiguration = null;
   var bookingCounter : Nat = 0;
   var warrantyCounter : Nat = 0;
+  var bankAccountDetails : ?BankAccountDetails = null;
 
   module Booking {
     public func compare(b1 : Booking, b2 : Booking) : Order.Order {
@@ -264,7 +271,6 @@ actor {
     };
   };
 
-  // Helper function for substring search (case-sensitive)
   func containsIgnoreCase(source : Text, search : Text) : Bool {
     if (search.isEmpty()) {
       return true;
@@ -307,7 +313,6 @@ actor {
     false;
   };
 
-  // Admin-only function to update battery prices
   public shared ({ caller }) func addBatteryPrice(price : BatteryPrice) : async () {
     if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
       Runtime.trap("Unauthorized: Only admins can add battery prices");
@@ -347,7 +352,6 @@ actor {
   };
 
   public query func getAllBatteryPrices(sortBy : Text) : async [BatteryPrice] {
-    // Public function - customers need to see battery prices
     batteryPrices.toArray();
   };
 
@@ -358,7 +362,6 @@ actor {
     batterySize : ?Text,
     priceRange : ?(Nat, Nat)
   ) : async [BatteryPrice] {
-    // Public function - customers need filtering options
     batteryPrices.toArray().filter(
       func(p) {
         let brandMatch = switch (brand) {
@@ -390,7 +393,6 @@ actor {
     );
   };
 
-  // User Profile Management
   public query ({ caller }) func getCallerUserProfile() : async ?UserProfile {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can access profiles");
@@ -411,7 +413,6 @@ actor {
     };
     userProfiles.add(caller, profile);
 
-    // Link technician profile to principal if applicable
     switch (profile.technicianId) {
       case (?techId) {
         technicianPrincipals.add(techId, caller);
@@ -420,7 +421,6 @@ actor {
     };
   };
 
-  // Helper function to check if caller is a technician
   func isTechnician(caller : Principal, techId : Text) : Bool {
     switch (technicianPrincipals.get(techId)) {
       case (?principal) { Principal.equal(principal, caller) };
@@ -428,7 +428,6 @@ actor {
     };
   };
 
-  // Helper function to check if caller owns a booking
   func ownsBooking(caller : Principal, bookingId : Text) : Bool {
     switch (bookings.get(bookingId)) {
       case (?booking) {
@@ -441,7 +440,6 @@ actor {
     };
   };
 
-  // Booking Management
   public query ({ caller }) func getAllBookings() : async [Booking] {
     if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
       Runtime.trap("Unauthorized: Only admins can view all bookings");
@@ -465,7 +463,6 @@ actor {
       Runtime.trap("Unauthorized: Only authenticated users can view bookings");
     };
 
-    // Technicians can only see their own bookings, admins can see all
     if (not (AccessControl.isAdmin(accessControlState, caller)) and not isTechnician(caller, techId)) {
       Runtime.trap("Unauthorized: Can only view your own assigned bookings");
     };
@@ -493,8 +490,6 @@ actor {
   };
 
   public shared ({ caller }) func createBooking(input : BookingInput) : async Text {
-    // Public function - anyone can create a booking (customers don't need authentication per spec)
-    // Anonymous principals (guests) are allowed to book services
     bookingCounter += 1;
     let bookingId = "BK" # bookingCounter.toText();
 
@@ -529,9 +524,6 @@ actor {
     switch (bookings.get(bookingId)) {
       case (null) { Runtime.trap("Booking not found") };
       case (?booking) {
-        // Admins can update any booking
-        // Technicians can update their assigned bookings
-        // Customers can cancel their own bookings
         let isAuthorized = AccessControl.isAdmin(accessControlState, caller) or
                           (switch (booking.technicianId) {
                             case (?techId) { isTechnician(caller, techId) };
@@ -571,7 +563,6 @@ actor {
   };
 
   public query func getBookableTimeSlots() : async [Text] {
-    // Public function - no authentication needed for viewing available time slots
     let slots = List.empty<Text>();
     slots.add("09:00");
     slots.add("10:00");
@@ -599,7 +590,6 @@ actor {
       Runtime.trap("Unauthorized: Only authenticated users can update location");
     };
 
-    // Only the technician themselves or admins can update location
     if (not (AccessControl.isAdmin(accessControlState, caller)) and not isTechnician(caller, techId)) {
       Runtime.trap("Unauthorized: Only admins or the technician can update location");
     };
@@ -613,14 +603,11 @@ actor {
     };
   };
 
-  // Inventory Management
   public query func getAvailableBatteries() : async [Battery] {
-    // Public function - customers need to see available batteries
     inventory.values().toArray().sort();
   };
 
   public query func findCompatibleBatteries(make : Text, model : Text, year : Nat) : async [Battery] {
-    // Public function - battery finder tool is public
     let filtered = inventory.values().toArray().filter(
       func(battery) {
         containsIgnoreCase(battery.brand, make) and containsIgnoreCase(battery.model, model)
@@ -643,9 +630,7 @@ actor {
     inventory.remove(batteryId);
   };
 
-  // Payment Processing
   public shared ({ caller }) func processPayment(bookingId : Text, amount : Nat, currency : Text, method : Text) : async Text {
-    // Customers can pay for their own bookings, admins can process any payment
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only authenticated users can process payments");
     };
@@ -665,7 +650,6 @@ actor {
     "success";
   };
 
-  // Notification System
   public type Notification = {
     to : Text;
     message : Text;
@@ -676,10 +660,8 @@ actor {
     if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
       Runtime.trap("Unauthorized: Only admins can send notifications");
     };
-    // Notification logic here
   };
 
-  // Stripe Configuration
   public shared ({ caller }) func setStripeConfiguration(config : Stripe.StripeConfiguration) : async () {
     if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
       Runtime.trap("Unauthorized: Only admins can set Stripe config");
@@ -695,7 +677,6 @@ actor {
   };
 
   public shared ({ caller }) func createCheckoutSession(items : [Stripe.ShoppingItem], successUrl : Text, cancelUrl : Text) : async Text {
-    // Customers need to create checkout sessions for payment
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only authenticated users can create checkout sessions");
     };
@@ -720,7 +701,6 @@ actor {
     await Stripe.getSessionStatus(getStripeConfiguration(), sessionId, transform);
   };
 
-  // Store Locations (Public)
   public type StoreLocation = {
     id : Text;
     name : Text;
@@ -731,7 +711,6 @@ actor {
   };
 
   public query func getStoreLocations() : async [StoreLocation] {
-    // Public function - customers need to see store locations
     let locations : [StoreLocation] = [
       {
         id = "1";
@@ -762,7 +741,6 @@ actor {
   };
 
   public query func getServiceAreas() : async [Text] {
-    // Public function - customers need to see service areas
     [
       "Dubai",
       "Abu Dhabi",
@@ -775,7 +753,6 @@ actor {
     ];
   };
 
-  // Technician Management
   public query ({ caller }) func getTechnicianAvailability() : async [TechnicianProfile] {
     if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
       Runtime.trap("Unauthorized: Only admins can view technician availability");
@@ -808,7 +785,6 @@ actor {
     technicians.remove(techId);
   };
 
-  // Analytics
   public query ({ caller }) func getBookingStatusCounts() : async [(BookingStatus, Nat)] {
     if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
       Runtime.trap("Unauthorized: Only admins can view analytics");
@@ -830,7 +806,6 @@ actor {
     ];
   };
 
-  // Warranty Management
   public shared ({ caller }) func createWarranty(input : WarrantyInput) : async Text {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only authenticated users can create warranties");
@@ -866,7 +841,6 @@ actor {
     warranties.values().toArray().sort();
   };
 
-  // Fleet Management
   public shared ({ caller }) func createFleetAccount(fleet : FleetAccount) : async () {
     if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
       Runtime.trap("Unauthorized: Only admins can create fleet accounts");
@@ -888,10 +862,7 @@ actor {
     fleets.values().toArray();
   };
 
-  // Customer Management
   public shared ({ caller }) func createCustomer(customer : Customer) : async () {
-    // Require authentication to prevent abuse and track who creates customer records
-    // Guests can still book services via createBooking without authentication
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only authenticated users can create customer profiles");
     };
@@ -912,7 +883,33 @@ actor {
     customers.values().toArray().sort();
   };
 
-  // Test function
+  public query ({ caller }) func getReceiverBankAccountDetails() : async BankAccountDetails {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can view bank account details");
+    };
+    switch (bankAccountDetails) {
+      case (?details) { details };
+      case (null) { Runtime.trap("Bank account details not found") };
+    };
+  };
+
+  public query ({ caller }) func getReceiverIban() : async Text {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can view bank account details");
+    };
+    switch (bankAccountDetails) {
+      case (?details) { details.iban };
+      case (null) { Runtime.trap("Bank account details not found") };
+    };
+  };
+
+  public shared ({ caller }) func updateReceiverBankAccountDetails(details : BankAccountDetails) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can update bank account details");
+    };
+    bankAccountDetails := ?details;
+  };
+
   public shared ({ caller }) func testOutcall(_ : Text) : async Text {
     "Hello World!";
   };

@@ -1,58 +1,92 @@
-import { useState } from 'react';
-import { useNavigate } from '@tanstack/react-router';
-import Header from '../components/Header';
-import Footer from '../components/Footer';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { toast } from 'sonner';
-import { useGetCallerUserProfile, useGetBookingsByTechnician, useUpdateBookingStatus } from '../hooks/useQueries';
-import { BookingStatus } from '../backend';
-import { MapPin, Phone, Mail, Clock, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useNavigate } from "@tanstack/react-router";
+import {
+  AlertCircle,
+  CheckCircle2,
+  Clock,
+  Mail,
+  MapPin,
+  Phone,
+} from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
+import type { BookingStatus } from "../backend";
+import Footer from "../components/Footer";
+import Header from "../components/Header";
+import {
+  useGetBookingsByTechnician,
+  useGetCallerUserProfile,
+  useUpdateBookingStatus,
+} from "../hooks/useQueries";
 
 export default function TechnicianDashboard() {
   const navigate = useNavigate();
   const { data: userProfile } = useGetCallerUserProfile();
-  const technicianId = userProfile?.technicianId || '';
+  const technicianId = userProfile?.technicianId || "";
   const { data: bookings = [] } = useGetBookingsByTechnician(technicianId);
   const updateBookingStatus = useUpdateBookingStatus();
 
-  const handleStatusUpdate = async (bookingId: string, newStatus: BookingStatus) => {
+  const handleStatusUpdate = async (
+    bookingId: string,
+    newStatus: BookingStatus,
+  ) => {
     try {
       await updateBookingStatus.mutateAsync({ bookingId, newStatus });
-      toast.success('Job status updated!');
+      toast.success("Job status updated!");
     } catch (error) {
-      console.error('Status update error:', error);
-      toast.error('Failed to update status');
+      console.error("Status update error:", error);
+      toast.error("Failed to update status");
     }
   };
 
-  if (!userProfile || userProfile.userType !== 'technician') {
+  if (!userProfile || userProfile.userType !== "technician") {
     return (
       <div className="min-h-screen">
         <Header />
         <div className="container mx-auto px-4 py-20 text-center">
           <AlertCircle className="h-16 w-16 text-destructive mx-auto mb-4" />
           <h1 className="text-3xl font-bold mb-4">Access Denied</h1>
-          <p className="text-muted-foreground mb-6">You don't have permission to access the technician dashboard.</p>
-          <Button onClick={() => navigate({ to: '/' })}>Go to Home</Button>
+          <p className="text-muted-foreground mb-6">
+            You don't have permission to access the technician dashboard.
+          </p>
+          <Button onClick={() => navigate({ to: "/" })}>Go to Home</Button>
         </div>
         <Footer />
       </div>
     );
   }
 
-  const activeJobs = bookings.filter((b) => b.status === 'confirmed' || b.status === 'inProgress');
-  const completedJobs = bookings.filter((b) => b.status === 'completed');
+  const activeJobs = bookings.filter(
+    (b) => b.status === "confirmed" || b.status === "inProgress",
+  );
+  const completedJobs = bookings.filter((b) => b.status === "completed");
 
   const getStatusBadge = (status: BookingStatus) => {
     const variants: Record<BookingStatus, string> = {
-      pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
-      confirmed: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
-      inProgress: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
-      completed: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
-      cancelled: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
+      pending:
+        "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200",
+      confirmed:
+        "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
+      inProgress:
+        "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200",
+      completed:
+        "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
+      cancelled: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
     };
 
     return <Badge className={variants[status]}>{status}</Badge>;
@@ -65,7 +99,9 @@ export default function TechnicianDashboard() {
       <section className="container mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2">Technician Dashboard</h1>
-          <p className="text-muted-foreground">Welcome back, {userProfile.name}</p>
+          <p className="text-muted-foreground">
+            Welcome back, {userProfile.name}
+          </p>
         </div>
 
         {/* Stats */}
@@ -85,8 +121,12 @@ export default function TechnicianDashboard() {
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Completed Today</p>
-                  <p className="text-3xl font-bold mt-1">{completedJobs.length}</p>
+                  <p className="text-sm text-muted-foreground">
+                    Completed Today
+                  </p>
+                  <p className="text-3xl font-bold mt-1">
+                    {completedJobs.length}
+                  </p>
                 </div>
                 <CheckCircle2 className="h-10 w-10 text-green-600" />
               </div>
@@ -96,7 +136,9 @@ export default function TechnicianDashboard() {
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Total Assigned</p>
+                  <p className="text-sm text-muted-foreground">
+                    Total Assigned
+                  </p>
                   <p className="text-3xl font-bold mt-1">{bookings.length}</p>
                 </div>
                 <MapPin className="h-10 w-10 text-amber-600" />
@@ -114,7 +156,9 @@ export default function TechnicianDashboard() {
           <CardContent>
             <div className="space-y-4">
               {activeJobs.length === 0 ? (
-                <p className="text-center text-muted-foreground py-8">No active jobs at the moment</p>
+                <p className="text-center text-muted-foreground py-8">
+                  No active jobs at the moment
+                </p>
               ) : (
                 activeJobs.map((booking) => (
                   <Card key={booking.id}>
@@ -127,7 +171,10 @@ export default function TechnicianDashboard() {
                               {getStatusBadge(booking.status)}
                             </div>
                             <p className="text-sm text-muted-foreground">
-                              Service: {booking.serviceType.replace(/([A-Z])/g, ' $1').trim()}
+                              Service:{" "}
+                              {booking.serviceType
+                                .replace(/([A-Z])/g, " $1")
+                                .trim()}
                             </p>
                           </div>
                         </div>
@@ -137,7 +184,8 @@ export default function TechnicianDashboard() {
                             <div className="flex items-center gap-2 text-sm">
                               <MapPin className="h-4 w-4 text-muted-foreground" />
                               <span>
-                                {booking.location.address}, {booking.location.city}
+                                {booking.location.address},{" "}
+                                {booking.location.city}
                               </span>
                             </div>
                             <div className="flex items-center gap-2 text-sm">
@@ -149,15 +197,26 @@ export default function TechnicianDashboard() {
                           <div className="flex flex-col gap-2">
                             <Select
                               value={booking.status}
-                              onValueChange={(value) => handleStatusUpdate(booking.id, value as BookingStatus)}
+                              onValueChange={(value) =>
+                                handleStatusUpdate(
+                                  booking.id,
+                                  value as BookingStatus,
+                                )
+                              }
                             >
                               <SelectTrigger>
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="confirmed">Confirmed</SelectItem>
-                                <SelectItem value="inProgress">In Progress</SelectItem>
-                                <SelectItem value="completed">Completed</SelectItem>
+                                <SelectItem value="confirmed">
+                                  Confirmed
+                                </SelectItem>
+                                <SelectItem value="inProgress">
+                                  In Progress
+                                </SelectItem>
+                                <SelectItem value="completed">
+                                  Completed
+                                </SelectItem>
                               </SelectContent>
                             </Select>
                             <Button
@@ -166,7 +225,7 @@ export default function TechnicianDashboard() {
                               onClick={() =>
                                 window.open(
                                   `https://www.google.com/maps/search/?api=1&query=${booking.location.latitude},${booking.location.longitude}`,
-                                  '_blank'
+                                  "_blank",
                                 )
                               }
                             >
@@ -188,12 +247,16 @@ export default function TechnicianDashboard() {
         <Card>
           <CardHeader>
             <CardTitle>Completed Jobs</CardTitle>
-            <CardDescription>Your recently completed service calls</CardDescription>
+            <CardDescription>
+              Your recently completed service calls
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               {completedJobs.length === 0 ? (
-                <p className="text-center text-muted-foreground py-8">No completed jobs yet</p>
+                <p className="text-center text-muted-foreground py-8">
+                  No completed jobs yet
+                </p>
               ) : (
                 completedJobs.map((booking) => (
                   <Card key={booking.id}>
@@ -208,7 +271,10 @@ export default function TechnicianDashboard() {
                             {booking.location.city}, {booking.location.emirate}
                           </p>
                           <p className="text-sm text-muted-foreground">
-                            Service: {booking.serviceType.replace(/([A-Z])/g, ' $1').trim()}
+                            Service:{" "}
+                            {booking.serviceType
+                              .replace(/([A-Z])/g, " $1")
+                              .trim()}
                           </p>
                         </div>
                         <CheckCircle2 className="h-8 w-8 text-green-600" />

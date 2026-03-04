@@ -1,14 +1,14 @@
-import { useNavigate } from '@tanstack/react-router';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { ShoppingCart } from 'lucide-react';
-import { batteryProducts } from '@/data/buyNowProducts';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { batteryProducts } from "@/data/buyNowProducts";
+import { useNavigate } from "@tanstack/react-router";
+import { ShoppingCart } from "lucide-react";
 
 export default function BuyNowPage() {
   const navigate = useNavigate();
 
   const handleBuyNow = (productId: string) => {
-    navigate({ to: '/address-confirmation', search: { productId } });
+    navigate({ to: "/address-confirmation", search: { productId } });
   };
 
   return (
@@ -19,13 +19,17 @@ export default function BuyNowPage() {
             Buy Car Batteries
           </h1>
           <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-            Choose from our wide selection of premium car batteries. Fast delivery and professional installation available.
+            Choose from our wide selection of premium car batteries. Fast
+            delivery and professional installation available.
           </p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {batteryProducts.map((product) => (
-            <Card key={product.id} className="overflow-hidden hover:shadow-xl transition-shadow duration-300">
+            <Card
+              key={product.id}
+              className="overflow-hidden hover:shadow-xl transition-shadow duration-300"
+            >
               <CardContent className="p-0">
                 <div className="aspect-square bg-white dark:bg-gray-800 flex items-center justify-center p-4">
                   <img

@@ -150,6 +150,69 @@ export default function BatteryPriceListPage() {
             </CardContent>
           </Card>
 
+          {/* Fourth Battery Card - Standard DIN 60 (VARTA) */}
+          <Card
+            data-ocid="battery_price.card.4"
+            className="shadow-xl border-2 border-amber-200 dark:border-amber-700 overflow-hidden"
+          >
+            <CardContent className="p-0">
+              {/* Battery Image */}
+              <div className="relative bg-white dark:bg-gray-800">
+                <img
+                  src="/assets/uploads/IMG-20260304-WA0019-1.jpg"
+                  alt="VARTA Blue Dynamic D59 SMF DIN60 12V 60AH Car Battery - Standard DIN 60"
+                  className="w-full object-cover"
+                />
+              </div>
+
+              {/* Pricing Info */}
+              <div className="p-6 bg-white dark:bg-gray-900">
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-1">
+                  Standard DIN 60 Battery
+                </h2>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                  VARTA SMF DIN 60 60AH D59 MF56077
+                </p>
+
+                <div className="space-y-3 mb-6">
+                  <div className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-700">
+                    <span className="text-gray-700 dark:text-gray-300 font-medium">
+                      Price
+                    </span>
+                    <span className="text-2xl font-bold text-amber-600 dark:text-amber-400">
+                      495 AED
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-700">
+                    <span className="text-gray-700 dark:text-gray-300 font-medium">
+                      Installation Fee
+                    </span>
+                    <span className="text-lg font-semibold text-orange-600 dark:text-orange-400">
+                      50 AED
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between py-2 bg-amber-50 dark:bg-amber-900/20 rounded-lg px-3">
+                    <span className="text-gray-900 dark:text-white font-bold">
+                      Total
+                    </span>
+                    <span className="text-2xl font-bold text-green-600 dark:text-green-400">
+                      545 AED
+                    </span>
+                  </div>
+                </div>
+
+                <Button
+                  data-ocid="battery_price.primary_button.4"
+                  className="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 text-lg flex items-center justify-center gap-2"
+                  onClick={() => navigate({ to: "/buy-now" })}
+                >
+                  <ShoppingCart className="h-5 w-5" />
+                  Buy Now
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Second Battery Card - DIN 80 */}
           <Card
             data-ocid="battery_price.card.2"
@@ -203,6 +266,69 @@ export default function BatteryPriceListPage() {
 
                 <Button
                   data-ocid="battery_price.primary_button.2"
+                  className="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 text-lg flex items-center justify-center gap-2"
+                  onClick={() => navigate({ to: "/buy-now" })}
+                >
+                  <ShoppingCart className="h-5 w-5" />
+                  Buy Now
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Fifth Battery Card - Standard DIN 80 (VARTA F17) */}
+          <Card
+            data-ocid="battery_price.card.5"
+            className="shadow-xl border-2 border-amber-200 dark:border-amber-700 overflow-hidden"
+          >
+            <CardContent className="p-0">
+              {/* Battery Image */}
+              <div className="relative bg-white dark:bg-gray-800">
+                <img
+                  src="/assets/uploads/IMG-20260304-WA0020-1.jpg"
+                  alt="VARTA 12V DIN80 80AH F17 MF58039 Car Battery - Standard DIN 80"
+                  className="w-full object-cover"
+                />
+              </div>
+
+              {/* Pricing Info */}
+              <div className="p-6 bg-white dark:bg-gray-900">
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-1">
+                  Standard DIN 80 Battery
+                </h2>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                  VARTA 12V DIN80 80AH F17 MF58039
+                </p>
+
+                <div className="space-y-3 mb-6">
+                  <div className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-700">
+                    <span className="text-gray-700 dark:text-gray-300 font-medium">
+                      Price
+                    </span>
+                    <span className="text-2xl font-bold text-amber-600 dark:text-amber-400">
+                      600 AED
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-700">
+                    <span className="text-gray-700 dark:text-gray-300 font-medium">
+                      Installation Fee
+                    </span>
+                    <span className="text-lg font-semibold text-orange-600 dark:text-orange-400">
+                      50 AED
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between py-2 bg-amber-50 dark:bg-amber-900/20 rounded-lg px-3">
+                    <span className="text-gray-900 dark:text-white font-bold">
+                      Total
+                    </span>
+                    <span className="text-2xl font-bold text-green-600 dark:text-green-400">
+                      650 AED
+                    </span>
+                  </div>
+                </div>
+
+                <Button
+                  data-ocid="battery_price.primary_button.5"
                   className="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 text-lg flex items-center justify-center gap-2"
                   onClick={() => navigate({ to: "/buy-now" })}
                 >

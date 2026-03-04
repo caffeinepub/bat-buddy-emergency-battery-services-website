@@ -85,6 +85,13 @@ export default function Header() {
             >
               Buy Now
             </button>
+            <button
+              type="button"
+              onClick={() => handleNavigation("/battery-prices")}
+              className="text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary font-medium transition-colors"
+            >
+              Battery Prices
+            </button>
             {isAuthenticated && userProfile?.userType === "admin" && (
               <button
                 type="button"
@@ -185,6 +192,13 @@ export default function Header() {
               className="text-left text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary font-medium transition-colors"
             >
               Buy Now
+            </button>
+            <button
+              type="button"
+              onClick={() => handleNavigation("/battery-prices")}
+              className="text-left text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary font-medium transition-colors"
+            >
+              Battery Prices
             </button>
             {isAuthenticated && userProfile?.userType === "admin" && (
               <button

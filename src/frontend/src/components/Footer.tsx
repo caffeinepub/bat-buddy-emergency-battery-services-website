@@ -42,6 +42,14 @@ export default function Footer() {
                   Book Service
                 </a>
               </li>
+              <li>
+                <a
+                  href="/battery-prices"
+                  className="hover:text-primary transition-colors"
+                >
+                  Battery Prices
+                </a>
+              </li>
             </ul>
           </div>
           <div>

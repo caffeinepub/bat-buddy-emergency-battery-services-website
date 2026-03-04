@@ -14,6 +14,7 @@ import { useInternetIdentity } from "./hooks/useInternetIdentity";
 import { useGetCallerUserProfile } from "./hooks/useQueries";
 import AddressConfirmationPage from "./pages/AddressConfirmationPage";
 import AdminDashboard from "./pages/AdminDashboard";
+import BatteryPriceListPage from "./pages/BatteryPriceListPage";
 import BookingPage from "./pages/BookingPage";
 import BuyNowPage from "./pages/BuyNowPage";
 import HomePage from "./pages/HomePage";
@@ -44,6 +45,12 @@ const buyNowRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/buy-now",
   component: BuyNowPage,
+});
+
+const batteryPricesRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/battery-prices",
+  component: BatteryPriceListPage,
 });
 
 const addressConfirmationRoute = createRoute({
@@ -115,6 +122,7 @@ const routeTree = rootRoute.addChildren([
   indexRoute,
   bookingRoute,
   buyNowRoute,
+  batteryPricesRoute,
   addressConfirmationRoute,
   paymentOptionsRoute,
   adminRoute,
